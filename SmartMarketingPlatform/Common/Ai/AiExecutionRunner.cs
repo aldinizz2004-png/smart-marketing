@@ -1,7 +1,7 @@
+using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
-using SmartMarketingPlatform.Common.Auth;
 using SmartMarketingPlatform.Common.Errors;
 using SmartMarketingPlatform.Data;
 using SmartMarketingPlatform.Data.Seed;
@@ -13,7 +13,6 @@ namespace SmartMarketingPlatform.Common.Ai;
 public sealed class AiExecutionRunner(
     MarketingDbContext db,
     IMarketingAi ai,
-    ICurrentUser currentUser,
     IOptions<AiOptions> options,
     TimeProvider clock,
     ILogger<AiExecutionRunner> logger) : IAiExecutionRunner
@@ -87,9 +86,11 @@ public sealed class AiExecutionRunner(
         execution.LatencyMs = (int)stopwatch.ElapsedMilliseconds;
         execution.CompletedAt = clock.GetUtcNow();
 
+        // The tenant is read from the business, so background jobs (weekly reports) are billed too.
+        var tenantId = await db.Businesses.Where(b => b.Id == businessId).Select(b => b.TenantId).FirstAsync(cancellationToken);
         db.UsageEvents.Add(new UsageEvent
         {
-            TenantId = currentUser.TenantId,
+            TenantId = tenantId,
             BusinessId = businessId,
             AiExecutionId = execution.Id,
             EventType = usageType,
