@@ -19,6 +19,9 @@ public interface IMarketingAi
 
     Task<AiCallResult<IReadOnlyList<CommentAnalysis>>> AnalyzeCommentsAsync(
         MarketingContext context, IReadOnlyList<CommentInput> comments, CancellationToken cancellationToken);
+
+    Task<AiCallResult<OwnerReportDraft>> WriteOwnerReportAsync(
+        MarketingContext context, OwnerReportFacts facts, CancellationToken cancellationToken);
 }
 
 public sealed record CommentInput(Guid Id, string PlatformCode, string? AuthorName, string Body, string? PostBody);

@@ -209,6 +209,51 @@ public sealed class FakeMarketingAi(IOptions<AiOptions> options) : IMarketingAi
         return Task.FromResult(Result<IReadOnlyList<CommentAnalysis>>(context, results));
     }
 
+    public Task<AiCallResult<OwnerReportDraft>> WriteOwnerReportAsync(MarketingContext context, OwnerReportFacts f, CancellationToken cancellationToken)
+    {
+        var ar = context.Dialect is null || context.Dialect.Contains("Arabic", StringComparison.OrdinalIgnoreCase);
+        var reachChange = Change(f.Reach, f.PreviousReach);
+        var wins = new List<string>();
+        var concerns = new List<string>();
+        var actions = new List<string>();
+
+        if (f.BestFormat is { } format)
+            wins.Add(ar ? $"أفضل نوع محتوى كان {format.Key} بتفاعل {format.EngagementRate:P1}" : $"{format.Key} was your best format with {format.EngagementRate:P1} engagement");
+        if (f.BestPlatform is { } platform)
+            wins.Add(ar ? $"{platform.Key} جاب أعلى تفاعل ({platform.EngagementRate:P1})" : $"{platform.Key} brought the highest engagement ({platform.EngagementRate:P1})");
+        if (f.TopPost is { } top)
+            wins.Add(ar ? $"أقوى بوست وصل لـ {top.Reach:N0} شخص على {top.Platform}" : $"Your top post reached {top.Reach:N0} people on {top.Platform}");
+
+        if (f.Posts == 0)
+            concerns.Add(ar ? "ما انتشر ولا بوست بهالفترة" : "Nothing was published in this period");
+        if (f.UnansweredComplaints > 0)
+            concerns.Add(ar ? $"في {f.UnansweredComplaints} شكوى ما انرد عليها" : $"{f.UnansweredComplaints} complaint(s) have no reply yet");
+        if (f.PreviousEngagementRate > 0 && f.EngagementRate < f.PreviousEngagementRate)
+            concerns.Add(ar ? "التفاعل نزل عن الفترة الي قبل" : "Engagement went down compared with the previous period");
+
+        if (f.UnansweredComplaints + f.UnansweredQuestions > 0)
+            actions.Add(ar ? "رد على التعليقات المفتوحة، وابدأ بالشكاوي" : "Answer the open comments, complaints first");
+        if (f.AwaitingReview > 0)
+            actions.Add(ar ? $"وافق على {f.AwaitingReview} بوست مستني مراجعة" : $"Review the {f.AwaitingReview} post(s) waiting for approval");
+        if (f.BestFormat is { } best)
+            actions.Add(ar ? $"انشر أكتر بصيغة {best.Key}" : $"Publish more {best.Key} content");
+        if (f.OffersEndingSoon.Count > 0)
+            actions.Add(ar ? $"ذكّر الزباين بالعرض قبل ما يخلص: {f.OffersEndingSoon[0]}" : $"Remind customers before the offer ends: {f.OffersEndingSoon[0]}");
+        if (actions.Count == 0)
+            actions.Add(ar ? "خطط لبوستات الأسبوع الجاي" : "Plan next week's posts");
+
+        var draft = new OwnerReportDraft(
+            ar ? $"{f.Posts} بوست ووصول {f.Reach:N0} ({reachChange})" : $"{f.Posts} posts, reach {f.Reach:N0} ({reachChange})",
+            ar ? $"من {f.PeriodStartLocal} لـ {f.PeriodEndLocal} نشرنا {f.Posts} بوست لـ {context.BusinessName}، وجاكم {f.NewComments} تعليق جديد."
+               : $"From {f.PeriodStartLocal} to {f.PeriodEndLocal} we published {f.Posts} posts for {context.BusinessName} and received {f.NewComments} new comments.",
+            wins, concerns, actions);
+
+        return Task.FromResult(Result(context, draft));
+    }
+
+    private static string Change(decimal now, decimal before) =>
+        before == 0 ? (now == 0 ? "0%" : "new") : $"{(now - before) / before:+0%;-0%;0%}";
+
     private static CommentCategory Classify(string body)
     {
         bool Has(string[] words) => words.Any(w => body.Contains(w, StringComparison.OrdinalIgnoreCase));

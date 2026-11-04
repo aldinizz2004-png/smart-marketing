@@ -310,6 +310,62 @@ public sealed class LlmMarketingAi(ChatModelChain chain) : IMarketingAi
         return ToCallResult(result);
     }
 
+    // ---- owner report ------------------------------------------------------------------
+
+    public async Task<AiCallResult<OwnerReportDraft>> WriteOwnerReportAsync(MarketingContext context, OwnerReportFacts facts, CancellationToken cancellationToken)
+    {
+        var tz = Zone(context);
+        var user = $$"""
+            TASK: Write the periodic marketing report for the OWNER of the business (not for customers).
+            Explain what happened, what worked, what needs attention, and what to do next.
+
+            Rules:
+            - Use only the numbers in FACTS. Never invent numbers, posts or results. Engagement rates are fractions (0.05 = 5%).
+            - Plain words for a busy shop owner; no marketing jargon.
+            - nextActions are concrete things the owner can do this week, most important first.
+            - Write in {{(string.IsNullOrWhiteSpace(context.Dialect) ? "Arabic" : context.Dialect)}}.
+
+            FACTS:
+            {{JsonSerializer.Serialize(facts, PromptJson)}}
+
+            BUSINESS:
+            {{Facts(context, tz)}}
+
+            Return one JSON object:
+            {
+              "headline": string,        // one short line
+              "summary": string,         // 2-4 sentences
+              "wins": [string],          // 0-4 items
+              "concerns": [string],      // 0-4 items
+              "nextActions": [string]    // 1-5 items
+            }
+            """;
+
+        var result = await chain.RunAsync(new ChatRequest(SystemPrompt(context), user, Temperature: 0.4), text =>
+        {
+            var root = JsonNode.Parse(text) as JsonObject ?? throw Invalid("The answer is not a JSON object.");
+            var headline = root["headline"]?.ToString()?.Trim();
+            var summary = root["summary"]?.ToString()?.Trim();
+            if (string.IsNullOrWhiteSpace(headline) || headline.Length > 200) throw Invalid("Missing or too long headline.");
+            if (string.IsNullOrWhiteSpace(summary) || summary.Length > 1500) throw Invalid("Missing or too long summary.");
+
+            var draft = new OwnerReportDraft(headline, summary, Items(root["wins"], 4), Items(root["concerns"], 4), Items(root["nextActions"], 5));
+            if (draft.NextActions.Count == 0) throw Invalid("A report needs at least one next action.");
+
+            ThrowIfProhibited(string.Join("\n", [draft.Headline, draft.Summary, .. draft.Wins, .. draft.Concerns, .. draft.NextActions]), context);
+            return draft;
+        }, cancellationToken);
+
+        return ToCallResult(result);
+    }
+
+    private static IReadOnlyList<string> Items(JsonNode? node, int max) =>
+        (node as JsonArray ?? new JsonArray())
+            .Select(i => i?.ToString()?.Trim())
+            .Where(i => !string.IsNullOrEmpty(i) && i.Length <= 300)
+            .Take(max)
+            .ToList()!;
+
     // ---- prompt pieces -----------------------------------------------------------------
 
     private static string SystemPrompt(MarketingContext context)
