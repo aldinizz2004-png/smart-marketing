@@ -25,9 +25,8 @@ public static class FileSignature
         if (header.IsEmpty || header.Contains((byte)0)) return false;
         try
         {
-            // The header may cut a multi-byte character at the end; ignore the last 3 bytes.
-            var probe = header.Length > 3 ? header[..^3] : header;
-            new UTF8Encoding(false, throwOnInvalidBytes: true).GetCharCount(probe);
+            // flush: false accepts a multi-byte character cut at the end of the header.
+            new UTF8Encoding(false, throwOnInvalidBytes: true).GetDecoder().GetCharCount(header, flush: false);
             return true;
         }
         catch (DecoderFallbackException)
