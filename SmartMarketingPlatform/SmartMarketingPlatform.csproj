@@ -18,6 +18,10 @@
     <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.13" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="SmartMarketingPlatform.UnitTests" />
+  </ItemGroup>
+
   <!-- Translation files are read at runtime from the output folder. -->
   <ItemGroup>
     <Content Update="Resources\*.json" CopyToOutputDirectory="PreserveNewest" />

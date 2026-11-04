@@ -16,10 +16,22 @@ public sealed class ChatModelChain
     private readonly ILogger<ChatModelChain> logger;
 
     public ChatModelChain(IHttpClientFactory httpFactory, IOptions<AiOptions> options, TimeProvider clock, ILogger<ChatModelChain> logger)
+        : this(CreateModels(httpFactory, options.Value, logger), clock, logger)
     {
+    }
+
+    internal ChatModelChain(IReadOnlyList<(IChatModel Model, ChainEntry Entry)> models, TimeProvider clock, ILogger<ChatModelChain> logger)
+    {
+        if (models.Count == 0)
+            throw new InvalidOperationException(
+                "Ai:Provider is 'Llm' but no model in Ai:Chain has an API key. Set Ai:Gemini:ApiKey / Ai:Groq:ApiKey (user-secrets or environment).");
+        this.models = models;
         this.clock = clock;
         this.logger = logger;
-        var o = options.Value;
+    }
+
+    private static List<(IChatModel Model, ChainEntry Entry)> CreateModels(IHttpClientFactory httpFactory, AiOptions o, ILogger logger)
+    {
         var list = new List<(IChatModel, ChainEntry)>();
 
         foreach (var entry in o.Chain)
@@ -37,11 +49,7 @@ public sealed class ChatModelChain
             else
                 list.Add((model, entry));
         }
-
-        if (list.Count == 0)
-            throw new InvalidOperationException(
-                "Ai:Provider is 'Llm' but no model in Ai:Chain has an API key. Set Ai:Gemini:ApiKey / Ai:Groq:ApiKey (user-secrets or environment).");
-        models = list;
+        return list;
     }
 
     // "gemini-3.6-flash > gemini-3.5-flash-lite > ..." (what AiExecution.ModelName shows when every model failed).
