@@ -181,6 +181,45 @@ public sealed class FakeMarketingAi(IOptions<AiOptions> options) : IMarketingAi
         return Task.FromResult(Result(context, draft));
     }
 
+    private static readonly string[] SpamWords = ["http://", "https://", "follow me", "free followers", "تابعني", "ربح"];
+    private static readonly string[] ComplaintWords = ["bad", "cold", "late", "rude", "worst", "سيء", "سيئ", "بارد", "متأخر", "تأخر", "زعلان", "مش زاكي"];
+    private static readonly string[] BuyWords = ["order", "deliver", "book", "اطلب", "بدي", "توصيل", "احجز", "حجز"];
+    private static readonly string[] QuestionWords = ["?", "؟", "how much", "price", "when", "where", "كم", "بكم", "قديش", "وين", "متى", "شو"];
+    private static readonly string[] PraiseWords = ["love", "great", "amazing", "delicious", "best", "❤", "😍", "رائع", "طيب", "زاكي", "حلو", "بجنن", "يسلمو"];
+
+    public Task<AiCallResult<IReadOnlyList<CommentAnalysis>>> AnalyzeCommentsAsync(
+        MarketingContext context, IReadOnlyList<CommentInput> comments, CancellationToken cancellationToken)
+    {
+        var arabic = context.Dialect is null || context.Dialect.Contains("Arabic", StringComparison.OrdinalIgnoreCase);
+        var results = comments.Select(c =>
+        {
+            var category = Classify(c.Body);
+            var name = string.IsNullOrWhiteSpace(c.AuthorName) ? "" : " " + c.AuthorName.Split(' ')[0];
+            string? reply = category switch
+            {
+                CommentCategory.Praise => arabic ? $"يسلمو{name}! منستناك دايماً عند {context.BusinessName}" : $"Thank you{name}! See you soon at {context.BusinessName}.",
+                CommentCategory.Question => arabic ? $"أهلين{name}، بعتنالك التفاصيل برسالة خاصة" : $"Hi{name}, we sent you the details in a private message.",
+                CommentCategory.Complaint => arabic ? $"آسفين كتير{name}، بنتواصل معك هلأ بالخاص لنصلح الموضوع" : $"We are very sorry{name}. We will contact you privately to make it right.",
+                CommentCategory.PurchaseIntent => arabic ? $"أكيد{name}! ابعتلنا رسالة وبنرتبلك الطلب" : $"Sure{name}! Send us a message and we will arrange your order.",
+                _ => null
+            };
+            return new CommentAnalysis(c.Id, category, reply is not null, reply);
+        }).ToList();
+
+        return Task.FromResult(Result<IReadOnlyList<CommentAnalysis>>(context, results));
+    }
+
+    private static CommentCategory Classify(string body)
+    {
+        bool Has(string[] words) => words.Any(w => body.Contains(w, StringComparison.OrdinalIgnoreCase));
+        if (Has(SpamWords)) return CommentCategory.Spam;
+        if (Has(ComplaintWords)) return CommentCategory.Complaint;
+        if (Has(BuyWords)) return CommentCategory.PurchaseIntent;
+        if (Has(QuestionWords)) return CommentCategory.Question;
+        if (Has(PraiseWords)) return CommentCategory.Praise;
+        return CommentCategory.Other;
+    }
+
     private static ContentFormat DefaultFormat(ContentType type) => type switch
     {
         ContentType.Reel => ContentFormat.Reel,

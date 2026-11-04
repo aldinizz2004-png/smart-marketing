@@ -8,5 +8,6 @@ public enum UsageEventType
     VideoGeneration,
     Publish,
     CompetitorScan,
-    StrategyGeneration      // campaign plans and strategy runs
+    StrategyGeneration,     // campaign plans and strategy runs
+    CommentAnalysis
 }
