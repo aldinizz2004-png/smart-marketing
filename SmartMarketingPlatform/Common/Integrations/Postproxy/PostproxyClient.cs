@@ -44,6 +44,13 @@ public sealed class PostproxyClient(HttpClient http)
     public Task<JsonObject> GetStatsAsync(string postId, CancellationToken cancellationToken) =>
         SendAsync(HttpMethod.Get, $"api/posts/stats?post_ids={Uri.EscapeDataString(postId)}", null, null, cancellationToken);
 
+    public Task<JsonObject> ListCommentsAsync(string postId, string profileId, CancellationToken cancellationToken) =>
+        SendAsync(HttpMethod.Get, $"api/posts/{Uri.EscapeDataString(postId)}/comments?profile_id={Uri.EscapeDataString(profileId)}&per_page=100", null, null, cancellationToken);
+
+    public Task<JsonObject> ReplyToCommentAsync(string postId, string profileId, string parentCommentId, string body, CancellationToken cancellationToken) =>
+        SendAsync(HttpMethod.Post, $"api/posts/{Uri.EscapeDataString(postId)}/comments?profile_id={Uri.EscapeDataString(profileId)}",
+            new JsonObject { ["body"] = body, ["parent_id"] = parentCommentId }, null, cancellationToken);
+
     private async Task<JsonObject> SendAsync(HttpMethod method, string path, JsonObject? body, string? idempotencyKey, CancellationToken cancellationToken)
     {
         using var request = new HttpRequestMessage(method, path);
@@ -72,7 +79,12 @@ public sealed class PostproxyClient(HttpClient http)
             if (!response.IsSuccessStatusCode)
                 throw new PostproxyException(response.StatusCode, $"Postproxy returned {(int)response.StatusCode}: {(text.Length > 500 ? text[..500] : text)}");
 
-            var root = string.IsNullOrWhiteSpace(text) ? new JsonObject() : JsonNode.Parse(text) as JsonObject ?? new JsonObject();
+            var root = string.IsNullOrWhiteSpace(text) ? new JsonObject() : JsonNode.Parse(text) switch
+            {
+                JsonObject o => o,
+                JsonArray a => new JsonObject { ["data"] = a },
+                _ => new JsonObject()
+            };
             return root["data"] is JsonObject data && root["id"] is null ? data : root;
         }
     }
