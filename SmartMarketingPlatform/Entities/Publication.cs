@@ -12,4 +12,5 @@ public class Publication
 
     public PublicationJob PublicationJob { get; set; } = null!;
     public ICollection<MetricObservation> Metrics { get; set; } = new List<MetricObservation>();
+    public ICollection<PostComment> Comments { get; set; } = new List<PostComment>();
 }

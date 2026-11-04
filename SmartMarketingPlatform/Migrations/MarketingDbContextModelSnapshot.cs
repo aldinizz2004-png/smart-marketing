@@ -1160,6 +1160,90 @@ namespace SmartMarketingPlatform.Migrations
                         });
                 });
 
+            modelBuilder.Entity("SmartMarketingPlatform.Entities.PostComment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AnalyzedByExecutionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AuthorExternalId")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("AuthorName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("AuthorUsername")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<string>("ExternalCommentId")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<bool?>("NeedsReply")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("ParentExternalId")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTimeOffset>("PostedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("PublicationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset?>("RepliedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("RepliedByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ReplyBody")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SuggestedReply")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnalyzedByExecutionId");
+
+                    b.HasIndex("RepliedByUserId");
+
+                    b.HasIndex("PublicationId", "ExternalCommentId")
+                        .IsUnique();
+
+                    b.HasIndex("StatusId", "PostedAt");
+
+                    b.ToTable("PostComments", (string)null);
+                });
+
             modelBuilder.Entity("SmartMarketingPlatform.Entities.Product", b =>
                 {
                     b.Property<Guid>("Id")
@@ -2057,6 +2141,42 @@ namespace SmartMarketingPlatform.Migrations
                             IsActive = true,
                             SortOrder = 6,
                             TranslationKey = "status.publication_job.canceled"
+                        },
+                        new
+                        {
+                            Id = 1601,
+                            Category = "PostComment",
+                            Code = "New",
+                            IsActive = true,
+                            SortOrder = 1,
+                            TranslationKey = "status.post_comment.new"
+                        },
+                        new
+                        {
+                            Id = 1602,
+                            Category = "PostComment",
+                            Code = "Analyzed",
+                            IsActive = true,
+                            SortOrder = 2,
+                            TranslationKey = "status.post_comment.analyzed"
+                        },
+                        new
+                        {
+                            Id = 1603,
+                            Category = "PostComment",
+                            Code = "Replied",
+                            IsActive = true,
+                            SortOrder = 3,
+                            TranslationKey = "status.post_comment.replied"
+                        },
+                        new
+                        {
+                            Id = 1604,
+                            Category = "PostComment",
+                            Code = "Ignored",
+                            IsActive = true,
+                            SortOrder = 4,
+                            TranslationKey = "status.post_comment.ignored"
                         });
                 });
 
@@ -2859,6 +2979,39 @@ namespace SmartMarketingPlatform.Migrations
                     b.Navigation("Platform");
                 });
 
+            modelBuilder.Entity("SmartMarketingPlatform.Entities.PostComment", b =>
+                {
+                    b.HasOne("SmartMarketingPlatform.Entities.AiExecution", "AnalyzedByExecution")
+                        .WithMany()
+                        .HasForeignKey("AnalyzedByExecutionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("SmartMarketingPlatform.Entities.Publication", "Publication")
+                        .WithMany("Comments")
+                        .HasForeignKey("PublicationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SmartMarketingPlatform.Entities.AppUser", "RepliedByUser")
+                        .WithMany()
+                        .HasForeignKey("RepliedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("SmartMarketingPlatform.Entities.Status", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AnalyzedByExecution");
+
+                    b.Navigation("Publication");
+
+                    b.Navigation("RepliedByUser");
+
+                    b.Navigation("Status");
+                });
+
             modelBuilder.Entity("SmartMarketingPlatform.Entities.Product", b =>
                 {
                     b.HasOne("SmartMarketingPlatform.Entities.Business", "Business")
@@ -3253,6 +3406,8 @@ namespace SmartMarketingPlatform.Migrations
 
             modelBuilder.Entity("SmartMarketingPlatform.Entities.Publication", b =>
                 {
+                    b.Navigation("Comments");
+
                     b.Navigation("Metrics");
                 });
 

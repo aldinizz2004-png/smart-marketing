@@ -16,7 +16,15 @@ public interface IMarketingAi
         MarketingContext context, DateTimeOffset windowStart, DateTimeOffset windowEnd, CancellationToken cancellationToken);
 
     Task<AiCallResult<ContentDraft>> WriteContentAsync(MarketingContext context, ContentBrief brief, CancellationToken cancellationToken);
+
+    Task<AiCallResult<IReadOnlyList<CommentAnalysis>>> AnalyzeCommentsAsync(
+        MarketingContext context, IReadOnlyList<CommentInput> comments, CancellationToken cancellationToken);
 }
+
+public sealed record CommentInput(Guid Id, string PlatformCode, string? AuthorName, string Body, string? PostBody);
+
+// SuggestedReply is null when the comment needs no answer (spam, a reply between customers ...).
+public sealed record CommentAnalysis(Guid CommentId, CommentCategory Category, bool NeedsReply, string? SuggestedReply);
 
 public sealed record AiCallResult<T>(T Output, int InputTokens, int OutputTokens)
 {

@@ -7,5 +7,6 @@ public enum AiTaskType
     Creative,
     Review,
     Optimization,
-    CompetitorAnalysis
+    CompetitorAnalysis,
+    CommentAnalysis
 }

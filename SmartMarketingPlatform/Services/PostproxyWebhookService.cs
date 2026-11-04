@@ -12,6 +12,7 @@ namespace SmartMarketingPlatform.Services;
 public sealed class PostproxyWebhookService(
     MarketingDbContext db,
     PostproxyClient client,
+    ICommentService comments,
     TimeProvider clock,
     ILogger<PostproxyWebhookService> logger) : IPostproxyWebhookService
 {
@@ -28,6 +29,7 @@ public sealed class PostproxyWebhookService(
             "platform_post.failed" => await FailedAsync(data, cancellationToken),
             "platform_post.insights" => await InsightsAsync(data, webhookEvent["created_at"]?.ToString(), cancellationToken),
             "profile.disconnected" => await DisconnectedAsync(data, cancellationToken),
+            "comment.created" => await CommentCreatedAsync(data, cancellationToken),
             _ => "ignored"
         };
     }
@@ -64,6 +66,7 @@ public sealed class PostproxyWebhookService(
         job.ContentItem.StatusId = StatusIds.ContentItem.Approved;
 
         db.MetricObservations.RemoveRange(db.MetricObservations.Where(m => m.PublicationId == publication.Id));
+        db.PostComments.RemoveRange(db.PostComments.Where(c => c.PublicationId == publication.Id));
         db.Publications.Remove(publication);
         await db.SaveChangesAsync(cancellationToken);
         return "failed";
@@ -104,6 +107,17 @@ public sealed class PostproxyWebhookService(
             .Where(s => s.ExternalAccountId == profileId && s.CredentialRef == null && s.StatusId == StatusIds.SocialAccount.Connected)
             .ExecuteUpdateAsync(s => s.SetProperty(a => a.StatusId, StatusIds.SocialAccount.Disconnected), cancellationToken);
         return updated > 0 ? "disconnected" : "unknown_profile";
+    }
+
+    private async Task<string> CommentCreatedAsync(JsonObject data, CancellationToken cancellationToken)
+    {
+        var publication = await FindPublicationAsync(data, cancellationToken);
+        if (publication is null) return "unknown_post";
+
+        var comment = PostproxyCommentGateway.Parse(data);
+        if (comment is null) return "ignored";
+
+        return await comments.IngestAsync(publication.Id, comment, cancellationToken) ? "comment_added" : "duplicate";
     }
 
     private Task<Publication?> FindPublicationAsync(JsonObject data, CancellationToken cancellationToken)

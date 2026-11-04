@@ -251,6 +251,65 @@ public sealed class LlmMarketingAi(ChatModelChain chain) : IMarketingAi
         return ToCallResult(result);
     }
 
+    // ---- comments ----------------------------------------------------------------------
+
+    public async Task<AiCallResult<IReadOnlyList<CommentAnalysis>>> AnalyzeCommentsAsync(
+        MarketingContext context, IReadOnlyList<CommentInput> comments, CancellationToken cancellationToken)
+    {
+        var tz = Zone(context);
+        var user = $$"""
+            TASK: Read the customer comments below, classify each one and, when it deserves an answer,
+            write the public reply the business would post under it.
+
+            Reply rules:
+            - Short (one or two sentences), warm, in the customer language, signed by nobody.
+            - Complaints: apologize and move the conversation to private messages; never argue in public.
+            - Questions about prices: answer only with prices from BUSINESS; otherwise invite a private message.
+            - Spam, insults and comments between customers: needsReply false, suggestedReply null.
+
+            COMMENTS:
+            {{JsonSerializer.Serialize(comments.Select(c => new { id = c.Id, platform = c.PlatformCode, author = c.AuthorName, comment = c.Body, ourPost = c.PostBody }), PromptJson)}}
+
+            BUSINESS:
+            {{Facts(context, tz)}}
+
+            Return one JSON object:
+            {
+              "comments": [ {
+                "id": one of the comment ids above,
+                "category": {{EnumList<CommentCategory>()}},
+                "needsReply": boolean,
+                "suggestedReply": string or null
+              } ]
+            }
+            """;
+
+        var result = await chain.RunAsync(new ChatRequest(SystemPrompt(context), user, Temperature: 0.5), text =>
+        {
+            var root = JsonNode.Parse(text) as JsonObject ?? throw Invalid("The answer is not a JSON object.");
+            var items = root["comments"] as JsonArray ?? throw Invalid("No comments array.");
+            var known = comments.Select(c => c.Id).ToHashSet();
+            var analyses = new Dictionary<Guid, CommentAnalysis>();
+
+            foreach (var item in items.OfType<JsonObject>())
+            {
+                if (!Guid.TryParse(item["id"]?.ToString(), out var id) || !known.Contains(id) || analyses.ContainsKey(id)) continue;
+                if (!TryEnum<CommentCategory>(item["category"], out var category)) continue;
+
+                var reply = item["suggestedReply"]?.ToString()?.Trim();
+                var needsReply = item["needsReply"] is JsonValue v && v.TryGetValue<bool>(out var b) && b && !string.IsNullOrEmpty(reply);
+                if (reply is { Length: > 1000 }) throw Invalid("A suggested reply is too long.");
+                analyses[id] = new CommentAnalysis(id, category, needsReply, needsReply ? reply : null);
+            }
+
+            if (analyses.Count == 0) throw Invalid("No usable comment analysis in the answer.");
+            ThrowIfProhibited(string.Join("\n", analyses.Values.Select(a => a.SuggestedReply)), context);
+            return (IReadOnlyList<CommentAnalysis>)analyses.Values.ToList();
+        }, cancellationToken);
+
+        return ToCallResult(result);
+    }
+
     // ---- prompt pieces -----------------------------------------------------------------
 
     private static string SystemPrompt(MarketingContext context)
