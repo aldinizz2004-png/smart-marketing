@@ -195,15 +195,18 @@ if (string.Equals(builder.Configuration["Publishing:Provider"], "Postproxy", Str
         throw new InvalidOperationException("Publishing:Provider is 'Postproxy' but Postproxy:ApiKey is not set.");
     builder.Services.AddScoped<ISocialPublisher, PostproxySocialPublisher>();
     builder.Services.AddScoped<IMetricsProvider, PostproxyMetricsProvider>();
+    builder.Services.AddScoped<ICommentGateway, PostproxyCommentGateway>();
 }
 else
 {
     builder.Services.AddSingleton<ISocialPublisher, FakeSocialPublisher>();
     builder.Services.AddSingleton<IMetricsProvider, FakeMetricsProvider>();
+    builder.Services.AddSingleton<ICommentGateway, FakeCommentGateway>();
 }
 builder.Services.AddScoped<IPublishingService, PublishingService>();
 builder.Services.AddScoped<IPublicationProcessor, PublicationProcessor>();
 builder.Services.AddScoped<IPerformanceService, PerformanceService>();
+builder.Services.AddScoped<ICommentService, CommentService>();
 if (builder.Configuration.GetValue("Publishing:WorkerEnabled", true))
     builder.Services.AddHostedService<PublishingWorker>();
 
