@@ -13,8 +13,19 @@ namespace SmartMarketingPlatform.Controllers;
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status402PaymentRequired)]
 [ProducesResponseType<ProblemDetails>(StatusCodes.Status404NotFound)]
-public class SocialAccountsController(ISocialAccountService accounts) : ControllerBase
+public class SocialAccountsController(ISocialAccountService accounts, ISocialConnectionService connections) : ControllerBase
 {
+    // POST .../connect-link -> the URL where the owner logs in on the platform to connect the account
+    [HttpPost("connect-link")]
+    [Authorize(Policy = Policies.TenantAdmin)]
+    [ProducesResponseType<ConnectLinkResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status502BadGateway)]
+    public async Task<ActionResult<ConnectLinkResponse>> CreateConnectLink(Guid businessId, ConnectLinkRequest request, CancellationToken cancellationToken)
+        => Ok(await connections.CreateConnectLinkAsync(businessId, request, cancellationToken));
+
     [HttpGet]
     [ProducesResponseType<IReadOnlyList<SocialAccountResponse>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<SocialAccountResponse>>> GetAll(Guid businessId, CancellationToken cancellationToken)

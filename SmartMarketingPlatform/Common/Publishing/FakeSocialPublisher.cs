@@ -12,6 +12,8 @@ public sealed class FakeSocialPublisher : ISocialPublisher
 
     private readonly ConcurrentDictionary<string, int> _attempts = new();
 
+    public bool RequiresAccessToken => true;
+
     public Task<PublishResult> PublishAsync(PublishRequest request, CancellationToken cancellationToken)
     {
         var attempt = _attempts.AddOrUpdate(request.IdempotencyKey, 1, (_, n) => n + 1);

@@ -45,6 +45,10 @@ services:
       Ai__Provider: ${AI_PROVIDER:-Fake}
       Ai__Gemini__ApiKey: ${GEMINI_API_KEY:-}
       Ai__Groq__ApiKey: ${GROQ_API_KEY:-}
+      Publishing__Provider: ${PUBLISHING_PROVIDER:-Fake}
+      Postproxy__ApiKey: ${POSTPROXY_API_KEY:-}
+      Postproxy__WebhookSecret: ${POSTPROXY_WEBHOOK_SECRET:-}
+      Postproxy__PublicBaseUrl: ${PUBLIC_BASE_URL:-}
     ports:
       - "${API_HOST_PORT:-8080}:8080"
     volumes:

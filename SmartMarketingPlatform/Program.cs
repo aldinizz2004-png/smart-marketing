@@ -15,6 +15,7 @@ using SmartMarketingPlatform.Common.Auth;
 using SmartMarketingPlatform.Common.Brand;
 using SmartMarketingPlatform.Common.Errors;
 using SmartMarketingPlatform.Common.Health;
+using SmartMarketingPlatform.Common.Integrations.Postproxy;
 using SmartMarketingPlatform.Common.Options;
 using SmartMarketingPlatform.Common.Publishing;
 using SmartMarketingPlatform.Common.Secrets;
@@ -175,8 +176,31 @@ builder.Services.AddScoped<IContentService, ContentService>();
 
 // Publishing: jobs are created by the API and executed by a background worker in the same process.
 builder.Services.Configure<PublishingOptions>(builder.Configuration.GetSection(PublishingOptions.SectionName));
-builder.Services.AddSingleton<ISocialPublisher, FakeSocialPublisher>();
-builder.Services.AddSingleton<IMetricsProvider, FakeMetricsProvider>();
+builder.Services.Configure<PostproxyOptions>(builder.Configuration.GetSection(PostproxyOptions.SectionName));
+var postproxy = builder.Configuration.GetSection(PostproxyOptions.SectionName).Get<PostproxyOptions>() ?? new PostproxyOptions();
+builder.Services.AddHttpClient<PostproxyClient>(c =>
+{
+    c.BaseAddress = new Uri(postproxy.BaseUrl);
+    c.Timeout = TimeSpan.FromSeconds(postproxy.TimeoutSeconds);
+    if (postproxy.IsConfigured)
+        c.DefaultRequestHeaders.Authorization = new("Bearer", postproxy.ApiKey);
+});
+builder.Services.AddScoped<ISocialConnectionService, SocialConnectionService>();
+builder.Services.AddScoped<IPostproxyWebhookService, PostproxyWebhookService>();
+
+// Publishing:Provider = Fake (default) or Postproxy (real Facebook, Instagram, TikTok ... accounts).
+if (string.Equals(builder.Configuration["Publishing:Provider"], "Postproxy", StringComparison.OrdinalIgnoreCase))
+{
+    if (!postproxy.IsConfigured)
+        throw new InvalidOperationException("Publishing:Provider is 'Postproxy' but Postproxy:ApiKey is not set.");
+    builder.Services.AddScoped<ISocialPublisher, PostproxySocialPublisher>();
+    builder.Services.AddScoped<IMetricsProvider, PostproxyMetricsProvider>();
+}
+else
+{
+    builder.Services.AddSingleton<ISocialPublisher, FakeSocialPublisher>();
+    builder.Services.AddSingleton<IMetricsProvider, FakeMetricsProvider>();
+}
 builder.Services.AddScoped<IPublishingService, PublishingService>();
 builder.Services.AddScoped<IPublicationProcessor, PublicationProcessor>();
 builder.Services.AddScoped<IPerformanceService, PerformanceService>();
