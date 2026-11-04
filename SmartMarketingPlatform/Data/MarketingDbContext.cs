@@ -59,6 +59,7 @@ public class MarketingDbContext : DbContext
     public DbSet<ContentReview> ContentReviews => Set<ContentReview>();
     public DbSet<PublicationJob> PublicationJobs => Set<PublicationJob>();
     public DbSet<Publication> Publications => Set<Publication>();
+    public DbSet<PostComment> PostComments => Set<PostComment>();
 
     // Results and cost
     public DbSet<MetricObservation> MetricObservations => Set<MetricObservation>();
