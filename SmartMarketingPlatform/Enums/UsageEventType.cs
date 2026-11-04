@@ -9,5 +9,6 @@ public enum UsageEventType
     Publish,
     CompetitorScan,
     StrategyGeneration,     // campaign plans and strategy runs
-    CommentAnalysis
+    CommentAnalysis,
+    OwnerReport
 }
