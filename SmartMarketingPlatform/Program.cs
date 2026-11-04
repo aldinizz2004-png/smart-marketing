@@ -16,6 +16,8 @@ using SmartMarketingPlatform.Common.Brand;
 using SmartMarketingPlatform.Common.Errors;
 using SmartMarketingPlatform.Common.Health;
 using SmartMarketingPlatform.Common.Integrations.Postproxy;
+using SmartMarketingPlatform.Common.Notifications;
+using SmartMarketingPlatform.Common.Reports;
 using SmartMarketingPlatform.Common.Options;
 using SmartMarketingPlatform.Common.Publishing;
 using SmartMarketingPlatform.Common.Secrets;
@@ -209,6 +211,17 @@ builder.Services.AddScoped<IPerformanceService, PerformanceService>();
 builder.Services.AddScoped<ICommentService, CommentService>();
 if (builder.Configuration.GetValue("Publishing:WorkerEnabled", true))
     builder.Services.AddHostedService<PublishingWorker>();
+
+// Weekly owner reports, sent by email (Email:Provider = File in development: .html files in App_Data/outbox).
+builder.Services.Configure<ReportOptions>(builder.Configuration.GetSection(ReportOptions.SectionName));
+builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection(EmailOptions.SectionName));
+if (string.Equals(builder.Configuration["Email:Provider"], "Smtp", StringComparison.OrdinalIgnoreCase))
+    builder.Services.AddSingleton<IEmailSender, SmtpEmailSender>();
+else
+    builder.Services.AddSingleton<IEmailSender, FileEmailSender>();
+builder.Services.AddScoped<IReportService, ReportService>();
+if (builder.Configuration.GetValue("Reports:WorkerEnabled", true))
+    builder.Services.AddHostedService<ReportWorker>();
 
 var app = builder.Build();
 
