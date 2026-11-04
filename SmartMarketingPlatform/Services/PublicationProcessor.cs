@@ -83,11 +83,16 @@ public sealed class PublicationProcessor(
             && s.StatusId == StatusIds.Subscription.Active && s.StartsAt <= now && s.EndsAt > now, cancellationToken);
         if (!hasSubscription)
             return await FailAsync(job, "The tenant has no active subscription.", cancellationToken);
-        if (job.SocialAccount.StatusId != StatusIds.SocialAccount.Connected || job.SocialAccount.CredentialRef is null)
+        if (job.SocialAccount.StatusId != StatusIds.SocialAccount.Connected)
             return await FailAsync(job, "The social account is not connected.", cancellationToken);
-        var token = await secrets.GetAsync(job.SocialAccount.CredentialRef, cancellationToken);
-        if (token is null)
-            return await FailAsync(job, "The social account credential is missing.", cancellationToken);
+
+        string? token = null;
+        if (publisher.RequiresAccessToken)
+        {
+            token = job.SocialAccount.CredentialRef is null ? null : await secrets.GetAsync(job.SocialAccount.CredentialRef, cancellationToken);
+            if (token is null)
+                return await FailAsync(job, "The social account credential is missing.", cancellationToken);
+        }
 
         job.AttemptCount++;
         try

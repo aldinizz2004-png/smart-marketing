@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartMarketingPlatform.Common.Businesses;
 using SmartMarketingPlatform.Common.Errors;
 using SmartMarketingPlatform.Common.Pagination;
+using SmartMarketingPlatform.Common.Publishing;
 using SmartMarketingPlatform.Common.Statuses;
 using SmartMarketingPlatform.Data;
 using SmartMarketingPlatform.Data.Seed;
@@ -17,6 +18,7 @@ public sealed class PublishingService(
     MarketingDbContext db,
     IBusinessAccess access,
     StatusCatalog statuses,
+    ISocialPublisher publisher,
     TimeProvider clock,
     ILogger<PublishingService> logger) : IPublishingService
 {
@@ -266,14 +268,15 @@ public sealed class PublishingService(
                          ?? throw new NotFoundException("Social account not found.");
             if (chosen.PlatformCode != platformCode)
                 throw new BadRequestException($"This content is for {platformCode}; the account is on {chosen.PlatformCode}.");
-            if (chosen.StatusId != StatusIds.SocialAccount.Connected || chosen.CredentialRef is null)
+            if (chosen.StatusId != StatusIds.SocialAccount.Connected || (publisher.RequiresAccessToken && chosen.CredentialRef is null))
                 throw new ConflictException("This account is not connected. Reconnect it first.");
             return chosen;
         }
 
+        var needsToken = publisher.RequiresAccessToken;
         return await db.SocialAccounts
             .Where(s => s.BusinessId == businessId && s.PlatformCode == platformCode
-                        && s.StatusId == StatusIds.SocialAccount.Connected && s.CredentialRef != null)
+                        && s.StatusId == StatusIds.SocialAccount.Connected && (!needsToken || s.CredentialRef != null))
             .OrderBy(s => s.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken);
     }
