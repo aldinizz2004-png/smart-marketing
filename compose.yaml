@@ -1,0 +1,61 @@
+# Smart Marketing Platform: the API and its SQL Server database.
+# Secrets come from the .env file next to this file (never committed). See .env.example.
+name: smart-marketing
+
+services:
+  db:
+    # Same engine as the EF Core assignment: SQL Server (Express edition, like the local instance).
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?Set MSSQL_SA_PASSWORD in .env}
+    volumes:
+      - sqldata:/var/opt/mssql              # database files survive container removal
+    ports:
+      - "${DB_HOST_PORT:-14333}:1433"       # optional: lets SSMS / sqlcmd on the host inspect the database
+    healthcheck:
+      # "Healthy" only when SQL Server really answers a query.
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -b -Q \"SELECT 1\" -o /dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    networks:
+      - backend
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: smart-marketing-api:latest
+    depends_on:
+      db:
+        condition: service_healthy          # start the API only after SQL Server accepts queries
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      # "db" is the service name: Docker's internal DNS resolves it to the database container.
+      ConnectionStrings__MarketingDb: "Server=db,1433;Database=SmartMarketingDb;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True"
+      Jwt__Key: ${JWT_KEY:?Set JWT_KEY in .env}
+      Database__ApplyMigrationsOnStartup: "true"
+      DataProtection__KeysPath: /app/App_Data/keys
+      Swagger__Enabled: ${SWAGGER_ENABLED:-true}
+      # AI: "Fake" (default, no keys needed) or "Llm" (real models from Ai:Chain, with fallback).
+      Ai__Provider: ${AI_PROVIDER:-Fake}
+      Ai__Gemini__ApiKey: ${GEMINI_API_KEY:-}
+      Ai__Groq__ApiKey: ${GROQ_API_KEY:-}
+    ports:
+      - "${API_HOST_PORT:-8080}:8080"
+    volumes:
+      - appdata:/app/App_Data               # uploads, encrypted tokens and their keys survive restarts
+    networks:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  sqldata:
+  appdata:
+
+networks:
+  backend:

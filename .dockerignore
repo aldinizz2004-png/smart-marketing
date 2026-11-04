@@ -1,0 +1,31 @@
+# Keep the build context small and clean: only the source code goes to the Docker build.
+
+# Local build output (the image builds its own)
+**/bin/
+**/obj/
+
+# Local runtime data: uploads, encrypted secrets, keys
+**/App_Data/
+
+# IDE and OS files
+**/.vs/
+**/.vscode/
+**/.idea/
+**/*.user
+**/*.suo
+**/Thumbs.db
+**/.DS_Store
+
+# Git and secrets
+.git/
+.gitignore
+.env
+.env.*
+
+# Not needed inside the image
+Database/
+README.md
+Dockerfile
+.dockerignore
+compose.yaml
+**/*.http
