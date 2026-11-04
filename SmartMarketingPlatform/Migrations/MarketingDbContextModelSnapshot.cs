@@ -367,6 +367,10 @@ namespace SmartMarketingPlatform.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
+                    b.Property<string>("SocialGroupId")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<int>("StatusId")
                         .HasColumnType("int");
 

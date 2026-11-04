@@ -28,5 +28,6 @@ public class BusinessConfiguration : IEntityTypeConfiguration<Business>
         builder.Property(x => x.DefaultCurrency).HasMaxLength(3).IsFixedLength().IsRequired();
         builder.Property(x => x.ContactPhone).HasMaxLength(30);
         builder.Property(x => x.Description).HasMaxLength(2000);
+        builder.Property(x => x.SocialGroupId).HasMaxLength(100);
     }
 }

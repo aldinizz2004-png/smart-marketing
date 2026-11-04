@@ -14,6 +14,7 @@ public class Business
     public string DefaultCurrency { get; set; } = "ILS";
     public string? ContactPhone { get; set; }
     public string? Description { get; set; }
+    public string? SocialGroupId { get; set; }                  // profile group at the social media provider
     public int StatusId { get; set; }                           // Statuses (Category = "Business")
     public DateTimeOffset CreatedAt { get; set; }
     public DateTimeOffset UpdatedAt { get; set; }
