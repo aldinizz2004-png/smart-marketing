@@ -9,4 +9,5 @@ public interface IPerformanceService
     Task<IReadOnlyList<MetricPoint>> GetMetricHistoryAsync(Guid businessId, Guid publicationId, CancellationToken cancellationToken);
     Task<IReadOnlyList<MetricPoint>> RefreshMetricsAsync(Guid businessId, Guid publicationId, CancellationToken cancellationToken);
     Task<PerformanceResponse> GetPerformanceAsync(Guid businessId, PerformanceQuery query, CancellationToken cancellationToken);
+    Task<PerformanceResponse> ComputeAsync(Guid businessId, DateTimeOffset from, DateTimeOffset to, CancellationToken cancellationToken);
 }
