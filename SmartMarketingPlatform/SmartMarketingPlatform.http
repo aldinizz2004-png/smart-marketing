@@ -1,0 +1,32 @@
+@host = http://localhost:5233
+
+### Health: database reachable and migrations applied
+GET {{host}}/health
+
+### Statuses translated by query parameter
+GET {{host}}/api/statuses/Campaign?lang=ar
+
+### Statuses translated by Accept-Language header
+GET {{host}}/api/statuses/ContentItem
+Accept-Language: ar-PS,ar;q=0.9,en;q=0.8
+
+### Unknown status category -> 404 ProblemDetails
+GET {{host}}/api/statuses/Unknown
+
+### All platforms
+GET {{host}}/api/platforms?lang=en
+
+### One platform
+GET {{host}}/api/platforms/instagram?lang=ar
+
+### Unknown platform -> 404
+GET {{host}}/api/platforms/myspace
+
+### Detect platform from a pasted URL (tracking parameters removed)
+GET {{host}}/api/platforms/detect?url=https://www.instagram.com/rival_cafe/?igshid=abc
+
+### Invalid URL -> 400
+GET {{host}}/api/platforms/detect?url=not a url
+
+### Missing url -> 400 validation
+GET {{host}}/api/platforms/detect
