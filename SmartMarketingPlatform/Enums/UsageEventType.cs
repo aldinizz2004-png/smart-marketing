@@ -11,5 +11,7 @@ public enum UsageEventType
     StrategyGeneration,     // campaign plans and strategy runs
     CommentAnalysis,
     OwnerReport,
-    CompetitorAnalysis
+    CompetitorAnalysis,
+    CustomerReply,          // the AI reading a WhatsApp conversation
+    WhatsAppMessage         // a message we sent (Meta charges per conversation)
 }

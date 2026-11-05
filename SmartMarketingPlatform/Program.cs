@@ -18,6 +18,8 @@ using SmartMarketingPlatform.Common.Health;
 using SmartMarketingPlatform.Common.Competitors;
 using SmartMarketingPlatform.Common.Integrations.Instagram;
 using SmartMarketingPlatform.Common.Integrations.Postproxy;
+using SmartMarketingPlatform.Common.Integrations.WhatsApp;
+using SmartMarketingPlatform.Common.Messaging;
 using SmartMarketingPlatform.Common.Notifications;
 using SmartMarketingPlatform.Common.Reports;
 using SmartMarketingPlatform.Common.Options;
@@ -246,6 +248,29 @@ builder.Services.AddScoped<ICopyGuard, CopyGuard>();
 builder.Services.AddScoped<ICompetitorService, CompetitorService>();
 if (competitorOptions.WorkerEnabled)
     builder.Services.AddHostedService<CompetitorWorker>();
+
+// WhatsApp inbox. WhatsApp:Provider = Fake (nothing is sent) or Meta (WhatsApp Cloud API).
+builder.Services.Configure<WhatsAppOptions>(builder.Configuration.GetSection(WhatsAppOptions.SectionName));
+var whatsApp = builder.Configuration.GetSection(WhatsAppOptions.SectionName).Get<WhatsAppOptions>() ?? new WhatsAppOptions();
+if (string.Equals(whatsApp.Provider, "Meta", StringComparison.OrdinalIgnoreCase))
+{
+    if (string.IsNullOrWhiteSpace(whatsApp.AppSecret) || string.IsNullOrWhiteSpace(whatsApp.VerifyToken))
+        throw new InvalidOperationException("WhatsApp:Provider is 'Meta' but WhatsApp:AppSecret or WhatsApp:VerifyToken is not set.");
+    builder.Services.AddHttpClient<IWhatsAppGateway, MetaWhatsAppGateway>(c =>
+    {
+        c.BaseAddress = new Uri(whatsApp.GraphBaseUrl);
+        c.Timeout = TimeSpan.FromSeconds(whatsApp.TimeoutSeconds);
+    });
+}
+else
+{
+    builder.Services.AddSingleton<IWhatsAppGateway, FakeWhatsAppGateway>();
+}
+builder.Services.AddScoped<IConversationMessenger, ConversationMessenger>();
+builder.Services.AddScoped<IWhatsAppInboxService, WhatsAppInboxService>();
+builder.Services.AddScoped<IConversationService, ConversationService>();
+if (whatsApp.WorkerEnabled)
+    builder.Services.AddHostedService<WhatsAppWorker>();
 
 var app = builder.Build();
 

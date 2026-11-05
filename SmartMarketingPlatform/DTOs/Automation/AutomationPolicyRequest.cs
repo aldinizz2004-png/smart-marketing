@@ -30,6 +30,10 @@ public sealed class AutomationPolicyRequest
 
     public bool RequireSeparateReviewer { get; init; }          // the author cannot approve their own content
 
+    // Simple WhatsApp questions (prices, opening hours ...) answered by the AI without the owner.
+    // Orders, complaints and anything unsure always go to a person.
+    public bool AutoReplyToMessages { get; init; }
+
     [MaxLength(20)]
     public List<string> AllowedPlatforms { get; init; } = [];   // platform codes where auto-publishing is allowed
 

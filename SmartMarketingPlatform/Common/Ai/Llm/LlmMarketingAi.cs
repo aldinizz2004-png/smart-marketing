@@ -437,6 +437,80 @@ public sealed class LlmMarketingAi(ChatModelChain chain) : IMarketingAi
         return ToCallResult(result);
     }
 
+    // ---- WhatsApp ----------------------------------------------------------------------
+
+    public async Task<AiCallResult<CustomerReplyDraft>> ReplyToCustomerAsync(MarketingContext context, ChatThread thread, CancellationToken cancellationToken)
+    {
+        var tz = Zone(context);
+        var user = $$"""
+            TASK: You answer the business's WhatsApp messages. Read the CONVERSATION (oldest first) and write the next reply to the customer.
+
+            Rules:
+            - Answer only from BUSINESS (products, prices, offers, city). If the answer is not there, do not guess: needsOwner = true.
+            - Orders (buy, book, delivery), complaints, refunds, special requests, payment or personal details: needsOwner = true,
+              and reply is a short polite message the owner can send while taking over.
+            - Greetings and questions BUSINESS answers fully: needsOwner = false.
+            - One to three short sentences, warm, in the customer's language and dialect. If asked, say you are the shop's automatic assistant.
+            - confidence: how sure you are that the reply is correct and complete (0 to 1).
+
+            CONVERSATION:
+            {{JsonSerializer.Serialize(new { customer = thread.CustomerName, messages = thread.Lines.Select(l => new { from = l.FromCustomer ? "customer" : "business", text = l.Text, time = l.LocalTime }) }, PromptJson)}}
+
+            BUSINESS:
+            {{Facts(context, tz)}}
+
+            Return one JSON object:
+            {
+              "intent": {{EnumList<ConversationIntent>()}},
+              "reply": string or null,
+              "needsOwner": boolean,
+              "handoffReason": string or null,     // for the owner, when needsOwner is true
+              "confidence": number between 0 and 1
+            }
+            """;
+
+        var result = await chain.RunAsync(new ChatRequest(SystemPrompt(context), user, Temperature: 0.4), text =>
+        {
+            var root = JsonNode.Parse(text) as JsonObject ?? throw Invalid("The answer is not a JSON object.");
+            if (!TryEnum<ConversationIntent>(root["intent"], out var intent)) throw Invalid("Unknown intent.");
+            var reply = root["reply"]?.ToString()?.Trim();
+            var needsOwner = root["needsOwner"] is JsonValue v && v.TryGetValue<bool>(out var b) ? b : true;
+            var reason = root["handoffReason"]?.ToString()?.Trim();
+            if (reply is { Length: > 1000 }) throw Invalid("The reply is too long.");
+            if (!needsOwner && string.IsNullOrWhiteSpace(reply)) throw Invalid("No reply and no handoff.");
+            if (!string.IsNullOrEmpty(reply)) ThrowIfProhibited(reply, context);
+
+            // A number the facts do not contain may be an invented price: a person checks it first.
+            if (!needsOwner && UnknownNumber(reply!, context) is { } number)
+            {
+                needsOwner = true;
+                reason = $"The reply mentions {number}, which is not in the business facts.";
+            }
+
+            var confidence = root["confidence"] is JsonValue cv && cv.TryGetValue<decimal>(out var c) ? Math.Clamp(c, 0m, 1m) : 0.5m;
+            return new CustomerReplyDraft(intent, string.IsNullOrEmpty(reply) ? null : reply, needsOwner,
+                needsOwner ? Truncate(reason ?? "The AI is not sure.", 300) : null, Math.Round(confidence, 2));
+        }, cancellationToken);
+
+        return ToCallResult(result);
+    }
+
+    internal static string? UnknownNumber(string reply, MarketingContext context)
+    {
+        var known = context.Products.Select(p => p.Price)
+            .Concat(context.Offers.SelectMany(o => new[] { o.OfferPrice, o.DiscountPercent }).OfType<decimal>())
+            .Select(n => n.ToString("0.##", CultureInfo.InvariantCulture))
+            .ToHashSet();
+
+        var digits = new string(reply.Select(ch => ch is >= '٠' and <= '٩' ? (char)('0' + ch - '٠') : ch).ToArray());
+        return System.Text.RegularExpressions.Regex.Matches(digits, @"\d+(?:\.\d+)?")
+            .Select(m => m.Value)
+            .FirstOrDefault(n => decimal.TryParse(n, NumberStyles.Number, CultureInfo.InvariantCulture, out var value)
+                                 && value >= 10 && !known.Contains(value.ToString("0.##", CultureInfo.InvariantCulture)));
+    }
+
+    private static string Truncate(string value, int max) => value.Length <= max ? value : value[..max];
+
     // Advice that repeats a competitor caption is not learning, it is copying: ask another model.
     private static void ThrowIfCopied(IEnumerable<string> texts, CompetitorFacts facts)
     {

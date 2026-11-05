@@ -69,6 +69,7 @@ public sealed class AutomationPolicyService(
         policy.MonthlyAdBudget = request.MonthlyAdBudget;
         policy.BudgetCurrency = request.MonthlyAdBudget is null ? null : request.BudgetCurrency ?? business.DefaultCurrency;
         policy.RequireSeparateReviewer = request.RequireSeparateReviewer;
+        policy.AutoReplyToMessages = request.AutoReplyToMessages;
         policy.UpdatedBy = currentUser.UserId;
         if (!created)
             db.Entry(policy).Property(p => p.UpdatedBy).IsModified = true;   // a save always counts as an update (moves UpdatedAt)
@@ -98,7 +99,7 @@ public sealed class AutomationPolicyService(
 
     // Never configured = automation off: nothing is published without the owner.
     private static AutomationPolicyResponse Defaults(Guid businessId) => new(
-        businessId, false, false, 3, null, null, null, null, null, false, [], [], null, null);
+        businessId, false, false, 3, null, null, null, null, null, false, false, [], [], null, null);
 
     private static AutomationPolicyResponse ToResponse(AutomationPolicy p) => new(
         p.BusinessId,
@@ -111,6 +112,7 @@ public sealed class AutomationPolicyService(
         p.MonthlyAdBudget,
         p.BudgetCurrency,
         p.RequireSeparateReviewer,
+        p.AutoReplyToMessages,
         p.AllowedPlatforms.Select(x => x.PlatformCode).OrderBy(x => x).ToList(),
         p.AutoApplyRules.Select(x => x.ActionType).OrderBy(x => x).ToList(),
         p.UpdatedBy,

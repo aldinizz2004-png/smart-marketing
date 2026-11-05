@@ -26,6 +26,10 @@ public interface IMarketingAi
     // Patterns only (timing, formats, hooks, frequency ...), applied to OUR products. Never their words.
     Task<AiCallResult<IReadOnlyList<CompetitorInsightDraft>>> AnalyzeCompetitorsAsync(
         MarketingContext context, CompetitorFacts facts, CancellationToken cancellationToken);
+
+    // The next WhatsApp answer to a customer, and whether a person must take over.
+    Task<AiCallResult<CustomerReplyDraft>> ReplyToCustomerAsync(
+        MarketingContext context, ChatThread thread, CancellationToken cancellationToken);
 }
 
 public sealed record CommentInput(Guid Id, string PlatformCode, string? AuthorName, string Body, string? PostBody);

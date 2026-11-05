@@ -9,5 +9,6 @@ public enum AiTaskType
     Optimization,
     CompetitorAnalysis,
     CommentAnalysis,
-    OwnerReport
+    OwnerReport,
+    CustomerReply
 }

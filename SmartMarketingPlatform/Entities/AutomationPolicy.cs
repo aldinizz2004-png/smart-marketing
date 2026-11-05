@@ -12,6 +12,7 @@ public class AutomationPolicy
     public decimal? MonthlyAdBudget { get; set; }
     public string? BudgetCurrency { get; set; }
     public bool RequireSeparateReviewer { get; set; }           // author cannot approve own content
+    public bool AutoReplyToMessages { get; set; }               // the AI may answer simple WhatsApp questions alone
     public Guid UpdatedBy { get; set; }                         // FK -> AppUser
     public DateTimeOffset UpdatedAt { get; set; }
 
