@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using SmartMarketingPlatform.Common.Auth;
 using SmartMarketingPlatform.Common.Businesses;
@@ -16,7 +17,8 @@ public sealed class MediaService(
     MarketingDbContext db,
     IBusinessAccess access,
     ICurrentUser currentUser,
-    IFileStorage storage) : IMediaService
+    IFileStorage storage,
+    IImageDescriber describer) : IMediaService
 {
     public const long MaxUploadBytes = 50L * 1024 * 1024;   // the largest kind (video)
     private const long Mb = 1024 * 1024;
@@ -91,7 +93,17 @@ public sealed class MediaService(
         if (existingId is not null)
             throw new ConflictException($"This file was already uploaded (asset {existingId}).");
 
-        // 3) Store the bytes, then the row. If the row fails, remove the file (no orphans).
+        // 3) Picture size, read from the header (a small photo looks bad in an ad).
+        (int Width, int Height)? size = null;
+        if (detected.MimeType.StartsWith("image/", StringComparison.Ordinal))
+        {
+            input.Seek(0, SeekOrigin.Begin);
+            var start = new byte[(int)Math.Min(ImageSize.HeaderLength, file.Length)];
+            var got = await input.ReadAtLeastAsync(start, start.Length, throwOnEndOfStream: false, cancellationToken);
+            size = ImageSize.Read(start.AsSpan(0, got));
+        }
+
+        // 4) Store the bytes, then the row. If the row fails, remove the file (no orphans).
         var asset = new MediaAsset
         {
             BusinessId = businessId,
@@ -99,7 +111,9 @@ public sealed class MediaService(
             Kind = kind,
             MimeType = detected.MimeType,
             ByteSize = file.Length,
-            Sha256 = sha256
+            Sha256 = sha256,
+            Width = size?.Width,
+            Height = size?.Height
         };
         db.MediaAssets.Add(asset);   // EF assigns the Guid here
         asset.ObjectKey = $"{currentUser.TenantId:N}/{businessId:N}/{asset.Id:N}{detected.Extension}";
@@ -116,6 +130,14 @@ public sealed class MediaService(
             throw;
         }
 
+        return ToResponse(asset);
+    }
+
+    public async Task<MediaAssetResponse> DescribeAsync(Guid businessId, Guid id, bool force, CancellationToken cancellationToken)
+    {
+        await access.GetForWriteAsync(businessId, cancellationToken);
+        var asset = await LoadAsync(businessId, id, cancellationToken);
+        await describer.DescribeAsync(asset, force, cancellationToken);
         return ToResponse(asset);
     }
 
@@ -149,5 +171,22 @@ public sealed class MediaService(
     private static MediaAssetResponse ToResponse(MediaAsset m) => new(
         m.Id, m.BusinessId, m.ProductId, m.Kind, m.MimeType, m.ByteSize, m.Sha256,
         $"/api/businesses/{m.BusinessId}/media/{m.Id}/content",
+        m.Width, m.Height, m.VisualDescription, m.ShowsProduct, Issues(m.QualityIssuesJson), m.QualityAdvice, m.DescribedAt,
         m.CreatedAt);
+
+    private static IReadOnlyList<ImageQualityIssue> Issues(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json)) return [];
+        try
+        {
+            return (JsonSerializer.Deserialize<List<string>>(json) ?? [])
+                .Select(s => Enum.TryParse<ImageQualityIssue>(s, out var issue) ? issue : (ImageQualityIssue?)null)
+                .OfType<ImageQualityIssue>()
+                .ToList();
+        }
+        catch (JsonException)
+        {
+            return [];
+        }
+    }
 }

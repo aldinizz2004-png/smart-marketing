@@ -183,7 +183,8 @@ public sealed class FakeMarketingAi(IOptions<AiOptions> options) : IMarketingAi
             brief.Offer is not null,
             new JsonObject
             {
-                ["visualIdea"] = brief.Product is null ? $"Bright photo inside {context.BusinessName}" : $"Close-up of {brief.Product.Name} in natural light",
+                ["visualIdea"] = brief.Photos.Count > 0 ? $"Use the attached photo: {brief.Photos[0]}"
+                    : brief.Product is null ? $"Bright photo inside {context.BusinessName}" : $"Close-up of {brief.Product.Name} in natural light",
                 ["hashtags"] = new JsonArray($"#{context.City ?? "local"}", $"#{context.Category}"),
                 ["language"] = arabic ? "ar" : "en",
                 ["basedOnRevision"] = brief.PreviousBody is not null
@@ -355,6 +356,24 @@ public sealed class FakeMarketingAi(IOptions<AiOptions> options) : IMarketingAi
                 false, null, 0.9m);
         else
             draft = new(ConversationIntent.Other, null, true, "Not sure what the customer wants", 0.3m);
+
+        return Task.FromResult(Result(context, draft));
+    }
+
+    public Task<AiCallResult<ImageDescriptionDraft>> DescribeImageAsync(
+        MarketingContext context, ImageInput image, ProductInfo? product, CancellationToken cancellationToken)
+    {
+        var ar = context.Dialect is null || context.Dialect.Contains("Arabic", StringComparison.OrdinalIgnoreCase);
+        var subject = product?.Name ?? context.BusinessName;
+        IReadOnlyList<ImageQualityIssue> issues = image.IsLowResolution ? [ImageQualityIssue.LowResolution] : [];
+
+        var draft = new ImageDescriptionDraft(
+            ar ? $"صورة لـ {subject} بإضاءة طبيعية على خلفية بسيطة" : $"A photo of {subject} in natural light on a simple background",
+            true,
+            issues,
+            issues.Count == 0 ? null
+                : ar ? $"صوّر المنتج بدقة أعلى (على الأقل {ImageInput.MinGoodSide} بكسل) عشان يطلع واضح بالإعلان"
+                     : $"Take the photo at a higher resolution (at least {ImageInput.MinGoodSide} px) so it stays sharp in ads");
 
         return Task.FromResult(Result(context, draft));
     }

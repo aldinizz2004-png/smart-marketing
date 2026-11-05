@@ -25,6 +25,14 @@ public class MediaAssetConfiguration : IEntityTypeConfiguration<MediaAsset>
         builder.Property(x => x.MimeType).HasMaxLength(100).IsRequired();
         builder.Property(x => x.Sha256).HasMaxLength(64).IsFixedLength();
 
+        builder.HasOne(x => x.DescribedByExecution)
+            .WithMany()
+            .HasForeignKey(x => x.DescribedByExecutionId);
+
+        builder.Property(x => x.VisualDescription).HasMaxLength(1000);
+        builder.Property(x => x.QualityIssuesJson).HasMaxLength(500);
+        builder.Property(x => x.QualityAdvice).HasMaxLength(500);
+
         builder.HasIndex(x => x.ObjectKey).IsUnique();
     }
 }

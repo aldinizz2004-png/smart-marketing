@@ -30,8 +30,10 @@ public sealed class ContentService(
     IMarketingContextBuilder contextBuilder,
     IBrandGuard brandGuard,
     ICopyGuard copyGuard,
+    IImageDescriber describer,
     IPublishingService publishing,
-    TimeProvider clock) : IContentService
+    TimeProvider clock,
+    ILogger<ContentService> logger) : IContentService
 {
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
@@ -306,6 +308,7 @@ public sealed class ContentService(
         RevisionRequest request, string? previousBody, Guid? sourceRecommendationId, CancellationToken cancellationToken)
     {
         ContentRevision revision;
+        var assetIds = request.AssetIds.Distinct().ToList();
 
         if (request.GenerateWithAi)
         {
@@ -314,7 +317,12 @@ public sealed class ContentService(
 
             var product = request.ProductId is { } productId
                 ? await db.Products.AsNoTracking().Where(p => p.Id == productId && p.BusinessId == businessId)
-                      .Select(p => new ProductInfo(p.Id, p.Name, p.Price, p.Currency)).FirstOrDefaultAsync(cancellationToken)
+                      .Select(p => new ProductInfo(p.Id, p.Name, p.Price, p.Currency)
+                      {
+                          Look = p.MediaAssets.Where(m => m.VisualDescription != null).OrderByDescending(m => m.DescribedAt)
+                              .Select(m => m.VisualDescription).FirstOrDefault()
+                      })
+                      .FirstOrDefaultAsync(cancellationToken)
                   ?? throw new BadRequestException("Unknown productId for this business.")
                 : null;
             var offer = request.OfferId is { } offerId
@@ -323,8 +331,27 @@ public sealed class ContentService(
                   ?? throw new BadRequestException("Unknown or ended offerId for this business.")
                 : null;
 
+            // A post about a product uses the product's own photo when none was chosen: sharp photos first, then the newest.
+            var format = request.Format;
+            if (assetIds.Count == 0 && product is not null
+                && (format is ContentFormat.SingleImage or ContentFormat.Carousel || (format is null && type == ContentType.Post)))
+            {
+                assetIds = await db.MediaAssets.AsNoTracking()
+                    .Where(m => m.BusinessId == businessId && m.ProductId == product.Id && m.MimeType.StartsWith("image/"))
+                    .OrderByDescending(m => m.Width >= ImageInput.MinGoodSide && m.Height >= ImageInput.MinGoodSide)
+                    .ThenByDescending(m => m.CreatedAt)
+                    .Take(format == ContentFormat.Carousel ? 5 : 1)
+                    .Select(m => m.Id)
+                    .ToListAsync(cancellationToken);
+                if (assetIds.Count > 0)
+                    format ??= ContentFormat.SingleImage;
+            }
+
             var context = await contextBuilder.BuildAsync(businessId, campaign.Id, cancellationToken);
-            var brief = new ContentBrief(platform, type, request.Format, request.HookType, product, offer, request.Instructions, previousBody);
+            var brief = new ContentBrief(platform, type, format, request.HookType, product, offer, request.Instructions, previousBody)
+            {
+                Photos = await DescribePhotosAsync(businessId, assetIds, cancellationToken)
+            };
 
             var (draft, execution) = await aiRunner.RunAsync(
                 businessId, AiTaskType.Copy, UsageEventType.CopyGeneration, new { brief, context },
@@ -384,8 +411,35 @@ public sealed class ContentService(
         }
 
         revision.SourceRecommendationId = sourceRecommendationId;
-        await AttachAssetsAsync(businessId, revision, request.AssetIds, cancellationToken);
+        await AttachAssetsAsync(businessId, revision, assetIds, cancellationToken);
         return revision;
+    }
+
+    // What the attached photos show. A photo the AI has not seen yet is described now (once);
+    // if that fails the post is still written, just without the description.
+    private async Task<IReadOnlyList<string>> DescribePhotosAsync(Guid businessId, List<Guid> assetIds, CancellationToken cancellationToken)
+    {
+        if (assetIds.Count == 0) return [];
+
+        var photos = await db.MediaAssets
+            .Where(m => m.BusinessId == businessId && assetIds.Contains(m.Id) && m.MimeType.StartsWith("image/"))
+            .ToListAsync(cancellationToken);
+
+        var descriptions = new List<string>();
+        foreach (var photo in photos.OrderBy(p => assetIds.IndexOf(p.Id)))
+        {
+            try
+            {
+                await describer.DescribeAsync(photo, force: false, cancellationToken);
+            }
+            catch (AppException ex)
+            {
+                logger.LogWarning("Photo {AssetId} could not be described: {Message}", photo.Id, ex.Message);
+            }
+            if (photo.VisualDescription is { } description)
+                descriptions.Add(description);
+        }
+        return descriptions;
     }
 
     private async Task AttachAssetsAsync(Guid businessId, ContentRevision revision, List<Guid> assetIds, CancellationToken cancellationToken)

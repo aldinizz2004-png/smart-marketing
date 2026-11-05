@@ -61,7 +61,12 @@ public sealed class ChatModelChain
         var now = clock.GetUtcNow();
 
         // Models on cooldown are tried last rather than never: if every model is cooling down, still try.
-        var ordered = models.OrderBy(m => cooldownUntil.TryGetValue(Key(m.Model), out var until) && until > now).ToList();
+        var ordered = models
+            .Where(m => request.Images.Count == 0 || m.Entry.SupportsImages)
+            .OrderBy(m => cooldownUntil.TryGetValue(Key(m.Model), out var until) && until > now)
+            .ToList();
+        if (ordered.Count == 0)
+            throw new AiProviderException("no_vision_model", "No model in Ai:Chain can read images (SupportsImages).");
 
         foreach (var (model, entry) in ordered)
         {

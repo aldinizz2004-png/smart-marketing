@@ -12,6 +12,12 @@ public interface IChatModel
     Task<ChatCompletion> CompleteJsonAsync(ChatRequest request, CancellationToken cancellationToken);
 }
 
-public sealed record ChatRequest(string System, string User, double Temperature = 0.7, int MaxOutputTokens = 8192);
+public sealed record ChatRequest(string System, string User, double Temperature = 0.7, int MaxOutputTokens = 8192)
+{
+    // Pictures sent with the prompt. Only chain entries with SupportsImages receive such a request.
+    public IReadOnlyList<ChatImage> Images { get; init; } = [];
+}
+
+public sealed record ChatImage(string MimeType, byte[] Data);
 
 public sealed record ChatCompletion(string Text, int InputTokens, int OutputTokens);
