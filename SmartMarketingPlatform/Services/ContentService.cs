@@ -5,6 +5,7 @@ using SmartMarketingPlatform.Common.Ai;
 using SmartMarketingPlatform.Common.Auth;
 using SmartMarketingPlatform.Common.Brand;
 using SmartMarketingPlatform.Common.Businesses;
+using SmartMarketingPlatform.Common.Competitors;
 using SmartMarketingPlatform.Common.Errors;
 using SmartMarketingPlatform.Common.Pagination;
 using SmartMarketingPlatform.Common.Statuses;
@@ -28,6 +29,7 @@ public sealed class ContentService(
     IAiExecutionRunner aiRunner,
     IMarketingContextBuilder contextBuilder,
     IBrandGuard brandGuard,
+    ICopyGuard copyGuard,
     IPublishingService publishing,
     TimeProvider clock) : IContentService
 {
@@ -332,6 +334,8 @@ public sealed class ContentService(
             var banned = await brandGuard.FindProhibitedTermsAsync(businessId, draft.Body, cancellationToken);
             if (banned.Count > 0)
                 throw new BadGatewayException($"The AI text used prohibited words ({string.Join(", ", banned)}) and was discarded. Execution {execution.Id}.");
+            if (await copyGuard.FindCopyAsync(businessId, draft.Body, cancellationToken) is { } copied)
+                throw new BadGatewayException($"The AI text was too close to a post of {copied.Source} ({copied.Similarity * 100:0}% the same) and was discarded. Execution {execution.Id}.");
 
             revision = new ContentRevision
             {
@@ -365,6 +369,8 @@ public sealed class ContentService(
             var banned = await brandGuard.FindProhibitedTermsAsync(businessId, text, cancellationToken);
             if (banned.Count > 0)
                 throw new BadRequestException($"The text uses prohibited brand words: {string.Join(", ", banned)}.");
+            if (await copyGuard.FindCopyAsync(businessId, text, cancellationToken) is { } copied)
+                throw new BadRequestException($"The text is too close to a post of {copied.Source} ({copied.Similarity * 100:0}% the same). Write it in your own words.");
 
             revision = new ContentRevision
             {
