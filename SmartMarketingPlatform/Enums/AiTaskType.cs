@@ -10,5 +10,6 @@ public enum AiTaskType
     CompetitorAnalysis,
     CommentAnalysis,
     OwnerReport,
-    CustomerReply
+    CustomerReply,
+    ImageDescription
 }

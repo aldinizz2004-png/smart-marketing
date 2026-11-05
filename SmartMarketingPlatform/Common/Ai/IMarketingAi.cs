@@ -30,6 +30,10 @@ public interface IMarketingAi
     // The next WhatsApp answer to a customer, and whether a person must take over.
     Task<AiCallResult<CustomerReplyDraft>> ReplyToCustomerAsync(
         MarketingContext context, ChatThread thread, CancellationToken cancellationToken);
+
+    // Looks at a photo once; the description is saved and reused in every later prompt as text.
+    Task<AiCallResult<ImageDescriptionDraft>> DescribeImageAsync(
+        MarketingContext context, ImageInput image, ProductInfo? product, CancellationToken cancellationToken);
 }
 
 public sealed record CommentInput(Guid Id, string PlatformCode, string? AuthorName, string Body, string? PostBody);
@@ -69,7 +73,11 @@ public sealed record ContentBrief(
     ProductInfo? Product,
     OfferInfo? Offer,
     string? Instructions,
-    string? PreviousBody);
+    string? PreviousBody)
+{
+    // What the photos attached to this post show, so the text matches the picture.
+    public IReadOnlyList<string> Photos { get; init; } = [];
+}
 
 public sealed record ContentDraft(
     string Body,

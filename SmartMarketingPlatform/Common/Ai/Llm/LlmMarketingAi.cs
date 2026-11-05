@@ -197,7 +197,8 @@ public sealed class LlmMarketingAi(ChatModelChain chain) : IMarketingAi
                 hook = brief.Hook?.ToString() ?? "choose the best",
                 product = brief.Product,
                 offer = brief.Offer is null ? null : new { brief.Offer.Id, brief.Offer.Title, brief.Offer.DiscountPercent, brief.Offer.OfferPrice, endsAt = Local(brief.Offer.EndsAt, tz) },
-                instructions = brief.Instructions
+                instructions = brief.Instructions,
+                attachedPhotos = brief.Photos.Count == 0 ? null : brief.Photos
             }, PromptJson)}}
 
             BUSINESS:
@@ -207,6 +208,7 @@ public sealed class LlmMarketingAi(ChatModelChain chain) : IMarketingAi
             - Fit the platform: Instagram/Facebook up to ~6 short lines; TikTok/Reel captions 1-3 lines; WhatsApp messages short and personal.
             - Start with a strong first line that matches the hook.
             - If a product or offer is given, use its exact name and price. Never invent a price, a discount or a date.
+            - attachedPhotos describe the pictures published with this text: the text must match them and never mention what they do not show.
             - End with one clear call to action. Put hashtags only in "hashtags", not in "body".
 
             Return one JSON object:
@@ -495,6 +497,54 @@ public sealed class LlmMarketingAi(ChatModelChain chain) : IMarketingAi
         return ToCallResult(result);
     }
 
+    // ---- photos ------------------------------------------------------------------------
+
+    public async Task<AiCallResult<ImageDescriptionDraft>> DescribeImageAsync(
+        MarketingContext context, ImageInput image, ProductInfo? product, CancellationToken cancellationToken)
+    {
+        var language = string.IsNullOrWhiteSpace(context.Dialect) ? "Arabic" : context.Dialect;
+        var user = $$"""
+            TASK: Look at the attached photo of the business {{context.BusinessName}} ({{context.Category}}).
+            {{(product is null ? "It is a general photo of the business." : $"It should show the product \"{product.Name}\".")}}
+
+            1. Describe it for a copywriter who will write posts about it WITHOUT seeing it: what is shown, colors,
+               presentation, setting, mood. Facts only, 1 to 3 sentences, in {{language}}.
+            2. Judge it as an ad photo: list only the problems you really see.
+            3. If there are problems, give the owner ONE practical tip to take a better photo, in {{language}}.
+
+            Return one JSON object:
+            {
+              "description": string,
+              "showsProduct": boolean,          // the product is clearly visible
+              "issues": [{{EnumList<ImageQualityIssue>()}}],
+              "advice": string or null
+            }
+            """;
+
+        var request = new ChatRequest(SystemPrompt(context), user, Temperature: 0.2) { Images = [new ChatImage(image.MimeType, image.Data)] };
+        var result = await chain.RunAsync(request, text =>
+        {
+            var root = JsonNode.Parse(text) as JsonObject ?? throw Invalid("The answer is not a JSON object.");
+            var description = root["description"]?.ToString()?.Trim();
+            if (string.IsNullOrWhiteSpace(description) || description.Length > 1000) throw Invalid("Missing or too long description.");
+            var advice = root["advice"]?.ToString()?.Trim();
+            if (advice is { Length: > 500 }) throw Invalid("The advice is too long.");
+
+            // Resolution is measured, so the model's opinion about it is replaced by the measurement.
+            var issues = (root["issues"] as JsonArray ?? new JsonArray())
+                .Select(i => TryEnum<ImageQualityIssue>(i, out var issue) ? issue : (ImageQualityIssue?)null)
+                .OfType<ImageQualityIssue>()
+                .Where(i => i != ImageQualityIssue.LowResolution)
+                .ToList();
+            if (image.IsLowResolution) issues.Insert(0, ImageQualityIssue.LowResolution);
+
+            var showsProduct = root["showsProduct"] is JsonValue v && v.TryGetValue<bool>(out var b) && b;
+            return new ImageDescriptionDraft(description, showsProduct, issues.Distinct().ToList(), string.IsNullOrEmpty(advice) ? null : advice);
+        }, cancellationToken);
+
+        return ToCallResult(result);
+    }
+
     internal static string? UnknownNumber(string reply, MarketingContext context)
     {
         var known = context.Products.Select(p => p.Price)
@@ -546,7 +596,7 @@ public sealed class LlmMarketingAi(ChatModelChain chain) : IMarketingAi
         city = c.City,
         currency = c.Currency,
         voice = new { dialect = c.Dialect, tone = c.Tone, emojiLevel = c.EmojiLevel, preferredTerms = c.PreferredTerms, prohibitedTerms = c.ProhibitedTerms },
-        products = c.Products.Select(p => new { id = p.Id, name = p.Name, price = p.Price, currency = p.Currency }),
+        products = c.Products.Select(p => new { id = p.Id, name = p.Name, price = p.Price, currency = p.Currency, look = p.Look }),
         offers = c.Offers.Select(o => new { id = o.Id, title = o.Title, discountPercent = o.DiscountPercent, offerPrice = o.OfferPrice, endsAt = Local(o.EndsAt, tz) }),
         audiences = c.Audiences.Select(a => new { name = a.Name, description = a.Description }),
         platforms = c.Channels,

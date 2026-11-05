@@ -29,7 +29,11 @@ public sealed record MarketingContext(
     public IReadOnlyList<InsightInfo> Insights { get; init; } = [];
 }
 
-public sealed record ProductInfo(Guid Id, string Name, decimal Price, string Currency);
+public sealed record ProductInfo(Guid Id, string Name, decimal Price, string Currency)
+{
+    // What the product's photo shows, as described by the AI (null when it has no described photo).
+    public string? Look { get; init; }
+}
 public sealed record OfferInfo(Guid Id, string Title, decimal? DiscountPercent, decimal? OfferPrice, DateTimeOffset EndsAt);
 public sealed record AudienceInfo(Guid Id, string Name, string? Description);
 public sealed record CampaignInfo(Guid Id, string Name, CampaignObjective Objective, string GoalStatement,

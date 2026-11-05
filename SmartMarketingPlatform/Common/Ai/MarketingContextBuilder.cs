@@ -35,7 +35,15 @@ public sealed class MarketingContextBuilder(MarketingDbContext db, TimeProvider 
         var products = await db.Products.AsNoTracking()
             .Where(p => p.BusinessId == businessId && (productIds.Count > 0 ? productIds.Contains(p.Id) : p.IsActive))
             .OrderBy(p => p.Name).Take(MaxItems)
-            .Select(p => new ProductInfo(p.Id, p.Name, p.Price, p.Currency))
+            .Select(p => new ProductInfo(p.Id, p.Name, p.Price, p.Currency)
+            {
+                // The newest described photo of the product.
+                Look = p.MediaAssets
+                    .Where(m => m.VisualDescription != null)
+                    .OrderByDescending(m => m.DescribedAt)
+                    .Select(m => m.VisualDescription)
+                    .FirstOrDefault()
+            })
             .ToListAsync(cancellationToken);
 
         var offers = await db.Offers.AsNoTracking()

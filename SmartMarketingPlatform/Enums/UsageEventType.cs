@@ -13,5 +13,6 @@ public enum UsageEventType
     OwnerReport,
     CompetitorAnalysis,
     CustomerReply,          // the AI reading a WhatsApp conversation
-    WhatsAppMessage         // a message we sent (Meta charges per conversation)
+    WhatsAppMessage,        // a message we sent (Meta charges per conversation)
+    ImageDescription        // the AI looking at a photo
 }
