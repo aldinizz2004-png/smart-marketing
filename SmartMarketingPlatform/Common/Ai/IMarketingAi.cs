@@ -22,6 +22,10 @@ public interface IMarketingAi
 
     Task<AiCallResult<OwnerReportDraft>> WriteOwnerReportAsync(
         MarketingContext context, OwnerReportFacts facts, CancellationToken cancellationToken);
+
+    // Patterns only (timing, formats, hooks, frequency ...), applied to OUR products. Never their words.
+    Task<AiCallResult<IReadOnlyList<CompetitorInsightDraft>>> AnalyzeCompetitorsAsync(
+        MarketingContext context, CompetitorFacts facts, CancellationToken cancellationToken);
 }
 
 public sealed record CommentInput(Guid Id, string PlatformCode, string? AuthorName, string Body, string? PostBody);
@@ -45,7 +49,11 @@ public sealed record RecommendationDraft(
     JsonObject Payload,
     DateTimeOffset? ProposedPublishAt,
     string Rationale,
-    decimal Confidence);
+    decimal Confidence)
+{
+    // Competitor insights this recommendation is based on (saved as RecommendationEvidence).
+    public IReadOnlyList<Guid> InsightIds { get; init; } = [];
+}
 
 // What to write: where, what kind, about which product/offer, with which hook, and any extra instruction
 // (e.g. "shorter"). PreviousBody is set when the AI rewrites an existing revision.

@@ -23,7 +23,11 @@ public sealed record MarketingContext(
     short MaxPostsPerDay,
     string? PublishWindowStart,
     string? PublishWindowEnd,
-    CampaignInfo? Campaign);
+    CampaignInfo? Campaign)
+{
+    // The latest patterns learned from tracked competitors and inspirations.
+    public IReadOnlyList<InsightInfo> Insights { get; init; } = [];
+}
 
 public sealed record ProductInfo(Guid Id, string Name, decimal Price, string Currency);
 public sealed record OfferInfo(Guid Id, string Title, decimal? DiscountPercent, decimal? OfferPrice, DateTimeOffset EndsAt);
