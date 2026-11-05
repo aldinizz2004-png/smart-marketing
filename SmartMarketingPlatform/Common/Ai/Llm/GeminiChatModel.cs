@@ -12,13 +12,21 @@ public sealed class GeminiChatModel(HttpClient http, string apiKey, string model
 
     public async Task<ChatCompletion> CompleteJsonAsync(ChatRequest request, CancellationToken cancellationToken)
     {
+        var parts = new JsonArray();
+        foreach (var image in request.Images)
+            parts.Add(new JsonObject
+            {
+                ["inline_data"] = new JsonObject { ["mime_type"] = image.MimeType, ["data"] = Convert.ToBase64String(image.Data) }
+            });
+        parts.Add(new JsonObject { ["text"] = request.User });
+
         var body = new JsonObject
         {
             ["systemInstruction"] = new JsonObject { ["parts"] = new JsonArray(new JsonObject { ["text"] = request.System }) },
             ["contents"] = new JsonArray(new JsonObject
             {
                 ["role"] = "user",
-                ["parts"] = new JsonArray(new JsonObject { ["text"] = request.User })
+                ["parts"] = parts
             }),
             ["generationConfig"] = new JsonObject
             {

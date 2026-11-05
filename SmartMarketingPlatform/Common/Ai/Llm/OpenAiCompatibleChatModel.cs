@@ -16,7 +16,7 @@ public sealed class OpenAiCompatibleChatModel(HttpClient http, string provider, 
             ["model"] = model,
             ["messages"] = new JsonArray(
                 new JsonObject { ["role"] = "system", ["content"] = request.System },
-                new JsonObject { ["role"] = "user", ["content"] = request.User }),
+                new JsonObject { ["role"] = "user", ["content"] = UserContent(request) }),
             ["temperature"] = request.Temperature,
             ["max_completion_tokens"] = request.MaxOutputTokens,
             ["response_format"] = new JsonObject { ["type"] = "json_object" }
@@ -37,5 +37,20 @@ public sealed class OpenAiCompatibleChatModel(HttpClient http, string provider, 
             text,
             usage?["prompt_tokens"]?.GetValue<int>() ?? 0,
             usage?["completion_tokens"]?.GetValue<int>() ?? 0);
+    }
+
+    // Plain text, or text + pictures as data URLs for vision models.
+    private static JsonNode UserContent(ChatRequest request)
+    {
+        if (request.Images.Count == 0) return JsonValue.Create(request.User)!;
+
+        var content = new JsonArray(new JsonObject { ["type"] = "text", ["text"] = request.User });
+        foreach (var image in request.Images)
+            content.Add(new JsonObject
+            {
+                ["type"] = "image_url",
+                ["image_url"] = new JsonObject { ["url"] = $"data:{image.MimeType};base64,{Convert.ToBase64String(image.Data)}" }
+            });
+        return content;
     }
 }

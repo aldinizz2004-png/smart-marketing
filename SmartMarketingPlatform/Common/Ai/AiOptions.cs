@@ -38,4 +38,5 @@ public sealed class ChainEntry
     public string Model { get; init; } = "";
     public decimal InputCostPer1MTokensUsd { get; init; }
     public decimal OutputCostPer1MTokensUsd { get; init; }
+    public bool SupportsImages { get; init; }     // the model can look at pictures
 }
