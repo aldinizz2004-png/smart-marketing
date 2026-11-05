@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Options;
+using SmartMarketingPlatform.Common.Competitors;
 using SmartMarketingPlatform.Enums;
 
 namespace SmartMarketingPlatform.Common.Ai;
@@ -130,6 +131,15 @@ public sealed class FakeMarketingAi(IOptions<AiOptions> options) : IMarketingAi
             "Carousels keep people on the post longer than single images for menus and price lists.",
             0.55m));
 
+        // What was learned from competitors backs the reel idea and the evening slot.
+        var learned = context.Insights.Where(i => i.Type is InsightType.Format or InsightType.Hook or InsightType.PostingTime).Select(i => i.Id).ToList();
+        if (learned.Count > 0)
+            drafts[0] = drafts[0] with { InsightIds = learned };
+        var timing = context.Insights.Where(i => i.Type == InsightType.PostingTime).Select(i => i.Id).ToList();
+        var reschedule = drafts.FindIndex(d => d.ActionType == RecommendationAction.Reschedule);
+        if (timing.Count > 0 && reschedule >= 0)
+            drafts[reschedule] = drafts[reschedule] with { InsightIds = timing };
+
         return Task.FromResult(Result<IReadOnlyList<RecommendationDraft>>(context, drafts));
     }
 
@@ -250,6 +260,60 @@ public sealed class FakeMarketingAi(IOptions<AiOptions> options) : IMarketingAi
 
         return Task.FromResult(Result(context, draft));
     }
+
+    public Task<AiCallResult<IReadOnlyList<CompetitorInsightDraft>>> AnalyzeCompetitorsAsync(
+        MarketingContext context, CompetitorFacts facts, CancellationToken cancellationToken)
+    {
+        var ar = context.Dialect is null || context.Dialect.Contains("Arabic", StringComparison.OrdinalIgnoreCase);
+        var subject = context.Products.FirstOrDefault()?.Name ?? context.BusinessName;
+        var confidence = Math.Round(Math.Clamp(facts.PostsAnalyzed / 30m, 0.3m, 0.9m), 2);
+        var insights = new List<CompetitorInsightDraft>();
+
+        IReadOnlyList<Guid> Evidence(Func<SamplePost, bool> match) => facts.TopPosts.Where(match).Select(p => p.Id).Take(3).ToList();
+
+        if (facts.ByFormat.FirstOrDefault(g => g.Posts >= 2 && g.Lift > 1.1m) is { } format)
+            insights.Add(new CompetitorInsightDraft(InsightType.Format,
+                ar ? $"منشورات {format.Key} عندهم بتجيب تفاعل {format.Lift:0.#} ضعف المعدل" : $"Their {format.Key} posts get {format.Lift:0.#}x the usual engagement",
+                ar ? $"اعمل {format.Key} عن {subject} بأسلوبنا وصورنا" : $"Make a {format.Key} about {subject} in our own style",
+                confidence, Evidence(p => p.Format == format.Key)));
+
+        if (facts.ByTimeOfDay.FirstOrDefault(g => g.Posts >= 2) is { } time)
+            insights.Add(new CompetitorInsightDraft(InsightType.PostingTime,
+                ar ? $"أعلى تفاعل عندهم بين الساعة {time.Key}" : $"Their best engagement is between {time.Key}",
+                ar ? $"انشر بوستاتنا المهمة بين {time.Key}" : $"Publish our key posts between {time.Key}",
+                confidence, Evidence(p => p.LocalTime.Length >= 6 && CompetitorTime(p.LocalTime) == time.Key)));
+
+        if (facts.ByHook.FirstOrDefault(g => g.Posts >= 2 && g.Lift > 1.1m) is { } hook)
+            insights.Add(new CompetitorInsightDraft(InsightType.Hook,
+                ar ? $"البداية بأسلوب {hook.Key} بتجيب تفاعل {hook.Lift:0.#} ضعف" : $"Opening with a {hook.Key} hook gets {hook.Lift:0.#}x engagement",
+                ar ? $"ابدأ بوست {subject} بـ {hook.Key}" : $"Start the {subject} post with a {hook.Key} hook",
+                confidence, Evidence(p => p.Hook == hook.Key)));
+
+        if (facts.PostsPerWeekPerSource > 0)
+        {
+            var target = Math.Min(Math.Ceiling(facts.PostsPerWeekPerSource), context.MaxPostsPerDay * 7);
+            insights.Add(new CompetitorInsightDraft(InsightType.Frequency,
+                ar ? $"بينشروا تقريباً {facts.PostsPerWeekPerSource:0.#} مرات بالأسبوع" : $"They post about {facts.PostsPerWeekPerSource:0.#} times a week",
+                ar ? $"خلّي جدولنا {target} بوستات بالأسبوع" : $"Plan {target} posts a week",
+                Math.Round(confidence * 0.9m, 2), []));
+        }
+
+        if (facts.OfferShare > 0)
+        {
+            var offer = context.Offers.FirstOrDefault();
+            insights.Add(new CompetitorInsightDraft(InsightType.Offer,
+                ar ? $"{facts.OfferShare * 100:0}% من بوستاتهم عروض" : $"{facts.OfferShare * 100:0}% of their posts are offers",
+                offer is null
+                    ? (ar ? "فكّر بعرض صغير على منتج من منتجاتنا" : "Consider a small offer on one of our products")
+                    : (ar ? $"ذكّر بعرضنا: {offer.Title}" : $"Promote our offer: {offer.Title}"),
+                Math.Round(confidence * 0.8m, 2), Evidence(p => p.Hook == nameof(HookType.Offer))));
+        }
+
+        return Task.FromResult(Result<IReadOnlyList<CompetitorInsightDraft>>(context, insights));
+    }
+
+    private static string CompetitorTime(string localTime) =>
+        int.TryParse(localTime[^5..^3], out var hour) ? CompetitorStats.TimeOfDay(hour) : "";
 
     private static string Change(decimal now, decimal before) =>
         before == 0 ? (now == 0 ? "0%" : "new") : $"{(now - before) / before:+0%;-0%;0%}";

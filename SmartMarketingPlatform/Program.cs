@@ -15,6 +15,8 @@ using SmartMarketingPlatform.Common.Auth;
 using SmartMarketingPlatform.Common.Brand;
 using SmartMarketingPlatform.Common.Errors;
 using SmartMarketingPlatform.Common.Health;
+using SmartMarketingPlatform.Common.Competitors;
+using SmartMarketingPlatform.Common.Integrations.Instagram;
 using SmartMarketingPlatform.Common.Integrations.Postproxy;
 using SmartMarketingPlatform.Common.Notifications;
 using SmartMarketingPlatform.Common.Reports;
@@ -222,6 +224,28 @@ else
 builder.Services.AddScoped<IReportService, ReportService>();
 if (builder.Configuration.GetValue("Reports:WorkerEnabled", true))
     builder.Services.AddHostedService<ReportWorker>();
+
+// Competitors: accounts the owner learns from. Competitors:Provider = Fake (demo posts) or Instagram (Business Discovery).
+builder.Services.Configure<CompetitorOptions>(builder.Configuration.GetSection(CompetitorOptions.SectionName));
+var competitorOptions = builder.Configuration.GetSection(CompetitorOptions.SectionName).Get<CompetitorOptions>() ?? new CompetitorOptions();
+if (string.Equals(competitorOptions.Provider, "Instagram", StringComparison.OrdinalIgnoreCase))
+{
+    if (!competitorOptions.Instagram.IsConfigured)
+        throw new InvalidOperationException("Competitors:Provider is 'Instagram' but Competitors:Instagram:BusinessAccountId or AccessToken is not set.");
+    builder.Services.AddHttpClient<ICompetitorSource, InstagramDiscoverySource>(c =>
+    {
+        c.BaseAddress = new Uri(competitorOptions.Instagram.GraphBaseUrl);
+        c.Timeout = TimeSpan.FromSeconds(competitorOptions.Instagram.TimeoutSeconds);
+    });
+}
+else
+{
+    builder.Services.AddSingleton<ICompetitorSource, FakeCompetitorSource>();
+}
+builder.Services.AddScoped<ICopyGuard, CopyGuard>();
+builder.Services.AddScoped<ICompetitorService, CompetitorService>();
+if (competitorOptions.WorkerEnabled)
+    builder.Services.AddHostedService<CompetitorWorker>();
 
 var app = builder.Build();
 

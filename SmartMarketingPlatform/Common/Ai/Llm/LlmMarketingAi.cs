@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using SmartMarketingPlatform.Common.Competitors;
 using SmartMarketingPlatform.Enums;
 
 namespace SmartMarketingPlatform.Common.Ai.Llm;
@@ -114,7 +115,8 @@ public sealed class LlmMarketingAi(ChatModelChain chain) : IMarketingAi
                 "publishAtLocal": "yyyy-MM-ddTHH:mm" inside the period{{WindowHint(context)}}, or null,
                 "details": object or null,          // other actions, e.g. { "moveTo": "19:00" } or { "from": "SingleImage", "to": "Carousel" }
                 "rationale": string,                // why, for the owner, in the customer language
-                "confidence": number between 0 and 1
+                "confidence": number between 0 and 1,
+                "insightIds": [ids from marketInsights this recommendation follows] or []
               } ]
             }
             """;
@@ -125,6 +127,7 @@ public sealed class LlmMarketingAi(ChatModelChain chain) : IMarketingAi
             var items = root["recommendations"] as JsonArray ?? throw Invalid("No recommendations array.");
             var productIds = context.Products.Select(p => p.Id).ToHashSet();
             var offerIds = context.Offers.Select(o => o.Id).ToHashSet();
+            var insightIds = context.Insights.Select(i => i.Id).ToHashSet();
             var avoid = new JsonArray(context.ProhibitedTerms.Select(t => (JsonNode?)t).ToArray());
             var drafts = new List<RecommendationDraft>();
 
@@ -159,7 +162,10 @@ public sealed class LlmMarketingAi(ChatModelChain chain) : IMarketingAi
 
                 var confidence = item["confidence"] is JsonValue cv && cv.TryGetValue<decimal>(out var c) ? Math.Clamp(c, 0m, 1m) : 0.5m;
                 drafts.Add(new RecommendationDraft(
-                    action, payload, PublishAt(item["publishAtLocal"], tz, windowStart, windowEnd), rationale.Trim(), Math.Round(confidence, 2)));
+                    action, payload, PublishAt(item["publishAtLocal"], tz, windowStart, windowEnd), rationale.Trim(), Math.Round(confidence, 2))
+                {
+                    InsightIds = KnownIds(item["insightIds"], insightIds)
+                });
             }
 
             if (drafts.Count == 0) throw Invalid("No usable recommendation in the answer.");
@@ -366,6 +372,80 @@ public sealed class LlmMarketingAi(ChatModelChain chain) : IMarketingAi
             .Take(max)
             .ToList()!;
 
+    // ---- competitors -------------------------------------------------------------------
+
+    public async Task<AiCallResult<IReadOnlyList<CompetitorInsightDraft>>> AnalyzeCompetitorsAsync(
+        MarketingContext context, CompetitorFacts facts, CancellationToken cancellationToken)
+    {
+        var tz = Zone(context);
+        var user = $$"""
+            TASK: The owner tracks other accounts (competitors and inspirations) to LEARN from them, not to copy them.
+            FACTS are statistics computed from their recent public posts. Find the 3 to 6 patterns that matter most
+            and say how OUR business should apply each one with OUR products, offers and voice.
+
+            Rules:
+            - Patterns only: timing, formats, hooks, frequency, hashtags, offers, tone. Use only numbers present in FACTS.
+            - Engagement rates and lifts are for the owner: write 0.0395 as 4% and a lift of 1.22 as "22% more than usual".
+            - Never repeat their captions or slogans, and never mention their products, prices or offers as ours.
+            - applyToUs names one of OUR products or offers from BUSINESS when it fits, and respects our limits (max posts per day, publish window).
+            - A pattern seen in few posts gets a low confidence.
+            - Write summary and applyToUs in {{(string.IsNullOrWhiteSpace(context.Dialect) ? "Arabic" : context.Dialect)}}, for the owner.
+
+            FACTS:
+            {{JsonSerializer.Serialize(facts, PromptJson)}}
+
+            BUSINESS:
+            {{Facts(context with { Insights = [] }, tz)}}
+
+            Return one JSON object:
+            {
+              "insights": [ {
+                "type": {{EnumList<InsightType>()}},
+                "summary": string,              // the pattern, with its number (e.g. "reels get 2.1x the usual engagement")
+                "applyToUs": string,            // the concrete thing we do
+                "confidence": number between 0 and 1,
+                "evidencePostIds": [ids from FACTS.topPosts] or []
+              } ]
+            }
+            """;
+
+        var result = await chain.RunAsync(new ChatRequest(SystemPrompt(context), user, Temperature: 0.3), text =>
+        {
+            var root = JsonNode.Parse(text) as JsonObject ?? throw Invalid("The answer is not a JSON object.");
+            var items = root["insights"] as JsonArray ?? throw Invalid("No insights array.");
+            var postIds = facts.TopPosts.Select(p => p.Id).ToHashSet();
+            var insights = new List<CompetitorInsightDraft>();
+
+            foreach (var item in items.OfType<JsonObject>().Take(6))
+            {
+                if (!TryEnum<InsightType>(item["type"], out var type)) continue;
+                var summary = item["summary"]?.ToString()?.Trim();
+                var apply = item["applyToUs"]?.ToString()?.Trim();
+                if (string.IsNullOrWhiteSpace(summary) || string.IsNullOrWhiteSpace(apply)) continue;
+                if (summary.Length > 600 || apply.Length > 500) throw Invalid("An insight is too long.");
+
+                var confidence = item["confidence"] is JsonValue cv && cv.TryGetValue<decimal>(out var c) ? Math.Clamp(c, 0m, 1m) : 0.5m;
+                insights.Add(new CompetitorInsightDraft(type, summary, apply, Math.Round(confidence, 2), KnownIds(item["evidencePostIds"], postIds)));
+            }
+
+            if (insights.Count == 0) throw Invalid("No usable insight in the answer.");
+            ThrowIfProhibited(string.Join("\n", insights.Select(i => i.Summary + "\n" + i.ApplyToUs)), context);
+            ThrowIfCopied(insights.Select(i => i.ApplyToUs), facts);
+            return (IReadOnlyList<CompetitorInsightDraft>)insights;
+        }, cancellationToken);
+
+        return ToCallResult(result);
+    }
+
+    // Advice that repeats a competitor caption is not learning, it is copying: ask another model.
+    private static void ThrowIfCopied(IEnumerable<string> texts, CompetitorFacts facts)
+    {
+        foreach (var text in texts)
+            foreach (var post in facts.TopPosts.Where(p => p.Excerpt is not null))
+                if (PostText.Containment(text, post.Excerpt!) >= 0.5)
+                    throw new AiProviderException("copied_text", "The answer repeats a competitor caption.");
+    }
+
     // ---- prompt pieces -----------------------------------------------------------------
 
     private static string SystemPrompt(MarketingContext context)
@@ -379,6 +459,7 @@ public sealed class LlmMarketingAi(ChatModelChain chain) : IMarketingAi
             - Never use any word or phrase from prohibitedTerms, in any form. Use preferredTerms where they fit naturally.
             - Customer-facing text is written in {language}{(string.IsNullOrWhiteSpace(context.Tone) ? "" : $", with a {context.Tone} tone")}.
             - Emoji level {context.EmojiLevel} (0 = no emojis; higher = more, but never more than one per line).
+            - marketInsights are patterns learned from other accounts (timing, formats, hooks, frequency). Follow the patterns with OUR products, prices and voice; never copy another account's words, products, prices or offers.
             - Answer with ONE JSON object in exactly the requested shape. No markdown, no comments, no text outside the JSON.
             """;
     }
@@ -403,7 +484,8 @@ public sealed class LlmMarketingAi(ChatModelChain chain) : IMarketingAi
             goal = c.Campaign.GoalStatement,
             budget = c.Campaign.Budget,
             budgetCurrency = c.Campaign.BudgetCurrency
-        }
+        },
+        marketInsights = c.Insights.Count == 0 ? null : c.Insights.Select(i => new { id = i.Id, type = i.Type.ToString(), pattern = i.Summary, applyToUs = i.ApplyToUs })
     }, PromptJson);
 
     private static string WindowHint(MarketingContext c) =>
@@ -429,6 +511,13 @@ public sealed class LlmMarketingAi(ChatModelChain chain) : IMarketingAi
         var text = node is JsonValue v && v.TryGetValue<string>(out var s) ? s : null;
         return text is not null && !int.TryParse(text, out _) && Enum.TryParse(text.Trim(), ignoreCase: true, out value) && Enum.IsDefined(value);
     }
+
+    private static IReadOnlyList<Guid> KnownIds(JsonNode? node, HashSet<Guid> known) =>
+        (node as JsonArray ?? new JsonArray())
+            .Select(n => n is JsonValue v && v.TryGetValue<string>(out var s) && Guid.TryParse(s, out var id) && known.Contains(id) ? id : Guid.Empty)
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
 
     private static Guid? KnownId(JsonNode? node, HashSet<Guid> known) =>
         node is JsonValue v && v.TryGetValue<string>(out var s) && Guid.TryParse(s, out var id) && known.Contains(id) ? id : null;

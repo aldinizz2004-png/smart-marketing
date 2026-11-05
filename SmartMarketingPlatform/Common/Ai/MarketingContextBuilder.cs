@@ -10,6 +10,7 @@ namespace SmartMarketingPlatform.Common.Ai;
 public sealed class MarketingContextBuilder(MarketingDbContext db, TimeProvider clock) : IMarketingContextBuilder
 {
     private const int MaxItems = 20;
+    private const int MaxInsights = 8;
     private static readonly string[] DefaultChannels = ["instagram", "facebook"];
 
     public async Task<MarketingContext> BuildAsync(Guid businessId, Guid? campaignId, CancellationToken cancellationToken)
@@ -61,6 +62,17 @@ public sealed class MarketingContextBuilder(MarketingDbContext db, TimeProvider 
         if (channels.Count == 0)
             channels = [.. DefaultChannels];
 
+        // Only the latest analysis: older insights may describe habits the competitors have dropped.
+        var latestAnalysis = await db.CompetitorInsights.Where(i => i.BusinessId == businessId)
+            .MaxAsync(i => (DateTimeOffset?)i.CreatedAt, cancellationToken);
+        var insights = latestAnalysis is null ? [] : (await db.CompetitorInsights.AsNoTracking()
+                .Where(i => i.BusinessId == businessId && i.CreatedAt == latestAnalysis)
+                .OrderByDescending(i => i.Confidence).Take(MaxInsights)
+                .Select(i => new { i.Id, i.InsightType, i.Summary, i.DetailsJson })
+                .ToListAsync(cancellationToken))
+            .Select(i => new InsightInfo(i.Id, i.InsightType, i.Summary, CompetitorInsightDetails.ReadApplyToUs(i.DetailsJson)))
+            .ToList();
+
         return new MarketingContext(
             business.Id, business.Name, business.Category, business.City, business.TimeZoneId, business.DefaultCurrency,
             brand?.Dialect, brand?.Tone, brand?.EmojiLevel ?? 1,
@@ -71,6 +83,9 @@ public sealed class MarketingContextBuilder(MarketingDbContext db, TimeProvider 
             policy?.PublishWindowStart?.ToString("HH:mm", CultureInfo.InvariantCulture),
             policy?.PublishWindowEnd?.ToString("HH:mm", CultureInfo.InvariantCulture),
             campaign is null ? null : new CampaignInfo(campaign.Id, campaign.Name, campaign.Objective, campaign.GoalStatement,
-                campaign.Budget, campaign.BudgetCurrency, campaign.StartsAt, campaign.EndsAt));
+                campaign.Budget, campaign.BudgetCurrency, campaign.StartsAt, campaign.EndsAt))
+        {
+            Insights = insights
+        };
     }
 }
