@@ -974,6 +974,15 @@ namespace SmartMarketingPlatform.Migrations
                         .HasColumnType("datetimeoffset")
                         .HasDefaultValueSql("SYSDATETIMEOFFSET()");
 
+                    b.Property<DateTimeOffset?>("DescribedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("DescribedByExecutionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("Height")
+                        .HasColumnType("int");
+
                     b.Property<string>("Kind")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -992,14 +1001,34 @@ namespace SmartMarketingPlatform.Migrations
                     b.Property<Guid?>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("QualityAdvice")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("QualityIssuesJson")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("Sha256")
                         .HasMaxLength(64)
                         .HasColumnType("nchar(64)")
                         .IsFixedLength();
 
+                    b.Property<bool?>("ShowsProduct")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("VisualDescription")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int?>("Width")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BusinessId");
+
+                    b.HasIndex("DescribedByExecutionId");
 
                     b.HasIndex("ObjectKey")
                         .IsUnique();
@@ -3234,12 +3263,19 @@ namespace SmartMarketingPlatform.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("SmartMarketingPlatform.Entities.AiExecution", "DescribedByExecution")
+                        .WithMany()
+                        .HasForeignKey("DescribedByExecutionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("SmartMarketingPlatform.Entities.Product", "Product")
                         .WithMany("MediaAssets")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Business");
+
+                    b.Navigation("DescribedByExecution");
 
                     b.Navigation("Product");
                 });
