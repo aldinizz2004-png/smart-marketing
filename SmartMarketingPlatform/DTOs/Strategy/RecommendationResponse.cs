@@ -18,4 +18,8 @@ public sealed record RecommendationResponse(
     Guid? DecidedBy,
     DateTimeOffset? DecidedAt,
     DateTimeOffset? AppliedAt,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    IReadOnlyList<RecommendationEvidenceResponse> Evidence);
+
+// What the recommendation is based on: a competitor insight, a competitor post or one of our metrics.
+public sealed record RecommendationEvidenceResponse(Guid? CompetitorInsightId, Guid? SourcePostId, Guid? MetricObservationId, string? Interpretation);

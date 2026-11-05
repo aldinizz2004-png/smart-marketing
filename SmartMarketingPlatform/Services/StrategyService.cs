@@ -95,11 +95,12 @@ public sealed class StrategyService(
             ? policy.AutoApplyRules.Select(r => r.ActionType).ToHashSet()
             : [];
 
+        var insightSummaries = context.Insights.ToDictionary(i => i.Id, i => i.Summary);
         var decidedAt = clock.GetUtcNow();
         foreach (var draft in drafts)
         {
             var automatic = autoActions.Contains(draft.ActionType);
-            run.Recommendations.Add(new StrategyRecommendation
+            var recommendation = new StrategyRecommendation
             {
                 CampaignId = request.CampaignId,
                 ActionType = draft.ActionType,
@@ -110,7 +111,16 @@ public sealed class StrategyService(
                 StatusId = automatic ? StatusIds.Recommendation.Accepted : StatusIds.Recommendation.Pending,
                 AppliedAutomatically = automatic,
                 DecidedAt = automatic ? decidedAt : null
-            });
+            };
+
+            // Why: the competitor insights the AI followed, kept so the owner can see what it learned from.
+            foreach (var insightId in draft.InsightIds.Where(insightSummaries.ContainsKey))
+                recommendation.Evidence.Add(new RecommendationEvidence
+                {
+                    CompetitorInsightId = insightId,
+                    Interpretation = insightSummaries[insightId]
+                });
+            run.Recommendations.Add(recommendation);
         }
 
         run.AiExecutionId = execution.Id;
@@ -125,7 +135,8 @@ public sealed class StrategyService(
     {
         await access.GetAsync(businessId, cancellationToken);
         var page = await db.StrategyRuns.AsNoTracking()
-            .Include(r => r.Recommendations)
+            .Include(r => r.Recommendations).ThenInclude(x => x.Evidence)
+            .AsSplitQuery()
             .Where(r => r.BusinessId == businessId)
             .OrderByDescending(r => r.StartedAt).ThenByDescending(r => r.Id)
             .ToPagedResultAsync(query, cancellationToken);
@@ -135,7 +146,7 @@ public sealed class StrategyService(
     public async Task<StrategyRunResponse> GetRunAsync(Guid businessId, Guid runId, CancellationToken cancellationToken)
     {
         await access.GetAsync(businessId, cancellationToken);
-        var run = await db.StrategyRuns.AsNoTracking().Include(r => r.Recommendations)
+        var run = await db.StrategyRuns.AsNoTracking().Include(r => r.Recommendations).ThenInclude(x => x.Evidence)
                       .FirstOrDefaultAsync(r => r.Id == runId && r.BusinessId == businessId, cancellationToken)
                   ?? throw new NotFoundException("Strategy run not found.");
         return ToRunResponse(run);
@@ -145,7 +156,7 @@ public sealed class StrategyService(
     {
         await access.GetAsync(businessId, cancellationToken);
 
-        var recommendations = Recommendations(businessId).AsNoTracking();
+        IQueryable<StrategyRecommendation> recommendations = Recommendations(businessId).AsNoTracking().Include(r => r.Evidence);
         if (!string.IsNullOrWhiteSpace(query.Status))
         {
             var statusId = statuses.GetId("Recommendation", query.Status);
@@ -191,7 +202,7 @@ public sealed class StrategyService(
         db.StrategyRecommendations.Where(r => r.StrategyRun.BusinessId == businessId);
 
     private async Task<StrategyRecommendation> LoadRecommendationAsync(Guid businessId, Guid id, CancellationToken cancellationToken) =>
-        await Recommendations(businessId).FirstOrDefaultAsync(r => r.Id == id, cancellationToken)
+        await Recommendations(businessId).Include(r => r.Evidence).FirstOrDefaultAsync(r => r.Id == id, cancellationToken)
         ?? throw new NotFoundException("Recommendation not found.");
 
     private StrategyRunResponse ToRunResponse(StrategyRun r) => new(
@@ -203,5 +214,6 @@ public sealed class StrategyService(
         r.Id, r.StrategyRunId, r.CampaignId, r.ActionType,
         JsonDocument.Parse(r.ProposedPayloadJson).RootElement.Clone(),
         r.ProposedPublishAt, r.Rationale, r.Confidence, statuses.Describe(r.StatusId),
-        r.AppliedAutomatically, r.DecidedBy, r.DecidedAt, r.AppliedAt, r.CreatedAt);
+        r.AppliedAutomatically, r.DecidedBy, r.DecidedAt, r.AppliedAt, r.CreatedAt,
+        r.Evidence.Select(e => new RecommendationEvidenceResponse(e.CompetitorInsightId, e.SourcePostId, e.MetricObservationId, e.Interpretation)).ToList());
 }
