@@ -15,6 +15,7 @@ public sealed record AutomationPolicyResponse(
     decimal? MonthlyAdBudget,
     string? BudgetCurrency,
     bool RequireSeparateReviewer,
+    bool AutoReplyToMessages,
     IReadOnlyList<string> AllowedPlatforms,
     IReadOnlyList<RecommendationAction> AutoApplyActions,
     Guid? UpdatedBy,
