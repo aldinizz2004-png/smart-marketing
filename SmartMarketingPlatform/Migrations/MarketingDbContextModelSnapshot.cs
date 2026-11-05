@@ -194,6 +194,9 @@ namespace SmartMarketingPlatform.Migrations
                     b.Property<Guid>("BusinessId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<bool>("AutoReplyToMessages")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("AutomationEnabled")
                         .HasColumnType("bit");
 
@@ -765,6 +768,147 @@ namespace SmartMarketingPlatform.Migrations
                     b.HasIndex("AssetId");
 
                     b.ToTable("ContentRevisionAssets", (string)null);
+                });
+
+            modelBuilder.Entity("SmartMarketingPlatform.Entities.Conversation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BusinessId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<string>("CustomerName")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("CustomerPhone")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("HandoffReason")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTimeOffset?>("LastCustomerMessageAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("LastIntent")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTimeOffset>("LastMessageAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("SocialAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("StatusId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("SuggestedByExecutionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("SuggestedReply")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StatusId");
+
+                    b.HasIndex("SuggestedByExecutionId");
+
+                    b.HasIndex("SocialAccountId", "CustomerPhone")
+                        .IsUnique();
+
+                    b.HasIndex("BusinessId", "StatusId", "LastMessageAt");
+
+                    b.ToTable("Conversations", (string)null);
+                });
+
+            modelBuilder.Entity("SmartMarketingPlatform.Entities.ConversationMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AiExecutionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(4096)
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<string>("DeliveryStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Direction")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Error")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ExternalMessageId")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("MessageType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTimeOffset?>("ProcessedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("SentAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("SentByUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AiExecutionId");
+
+                    b.HasIndex("CreatedAt")
+                        .HasFilter("[ProcessedAt] IS NULL AND [Direction] = 'Inbound'");
+
+                    b.HasIndex("ExternalMessageId")
+                        .IsUnique()
+                        .HasFilter("[ExternalMessageId] IS NOT NULL");
+
+                    b.HasIndex("SentByUserId");
+
+                    b.HasIndex("ConversationId", "SentAt");
+
+                    b.ToTable("ConversationMessages", (string)null);
                 });
 
             modelBuilder.Entity("SmartMarketingPlatform.Entities.KnowledgeSource", b =>
@@ -2253,6 +2397,33 @@ namespace SmartMarketingPlatform.Migrations
                             IsActive = true,
                             SortOrder = 4,
                             TranslationKey = "status.post_comment.ignored"
+                        },
+                        new
+                        {
+                            Id = 1701,
+                            Category = "Conversation",
+                            Code = "Open",
+                            IsActive = true,
+                            SortOrder = 1,
+                            TranslationKey = "status.conversation.open"
+                        },
+                        new
+                        {
+                            Id = 1702,
+                            Category = "Conversation",
+                            Code = "WaitingForOwner",
+                            IsActive = true,
+                            SortOrder = 2,
+                            TranslationKey = "status.conversation.waiting_for_owner"
+                        },
+                        new
+                        {
+                            Id = 1703,
+                            Category = "Conversation",
+                            Code = "Closed",
+                            IsActive = true,
+                            SortOrder = 3,
+                            TranslationKey = "status.conversation.closed"
                         });
                 });
 
@@ -2970,6 +3141,65 @@ namespace SmartMarketingPlatform.Migrations
                     b.Navigation("Revision");
                 });
 
+            modelBuilder.Entity("SmartMarketingPlatform.Entities.Conversation", b =>
+                {
+                    b.HasOne("SmartMarketingPlatform.Entities.Business", "Business")
+                        .WithMany()
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SmartMarketingPlatform.Entities.SocialAccount", "SocialAccount")
+                        .WithMany()
+                        .HasForeignKey("SocialAccountId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SmartMarketingPlatform.Entities.Status", "Status")
+                        .WithMany()
+                        .HasForeignKey("StatusId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SmartMarketingPlatform.Entities.AiExecution", "SuggestedByExecution")
+                        .WithMany()
+                        .HasForeignKey("SuggestedByExecutionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Business");
+
+                    b.Navigation("SocialAccount");
+
+                    b.Navigation("Status");
+
+                    b.Navigation("SuggestedByExecution");
+                });
+
+            modelBuilder.Entity("SmartMarketingPlatform.Entities.ConversationMessage", b =>
+                {
+                    b.HasOne("SmartMarketingPlatform.Entities.AiExecution", "AiExecution")
+                        .WithMany()
+                        .HasForeignKey("AiExecutionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("SmartMarketingPlatform.Entities.Conversation", "Conversation")
+                        .WithMany("Messages")
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SmartMarketingPlatform.Entities.AppUser", "SentByUser")
+                        .WithMany()
+                        .HasForeignKey("SentByUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AiExecution");
+
+                    b.Navigation("Conversation");
+
+                    b.Navigation("SentByUser");
+                });
+
             modelBuilder.Entity("SmartMarketingPlatform.Entities.KnowledgeSource", b =>
                 {
                     b.HasOne("SmartMarketingPlatform.Entities.MediaAsset", "Asset")
@@ -3486,6 +3716,11 @@ namespace SmartMarketingPlatform.Migrations
                     b.Navigation("Assets");
 
                     b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("SmartMarketingPlatform.Entities.Conversation", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("SmartMarketingPlatform.Entities.Platform", b =>

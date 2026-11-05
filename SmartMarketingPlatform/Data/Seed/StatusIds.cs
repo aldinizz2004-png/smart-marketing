@@ -19,4 +19,5 @@ public static class StatusIds
     public static class ContentReview { public const int Approved = 1401, Rejected = 1402, ChangesRequested = 1403; }
     public static class PublicationJob { public const int Queued = 1501, Running = 1502, Succeeded = 1503, Retry = 1504, Failed = 1505, Canceled = 1506; }
     public static class PostComment { public const int New = 1601, Analyzed = 1602, Replied = 1603, Ignored = 1604; }
+    public static class Conversation { public const int Open = 1701, WaitingForOwner = 1702, Closed = 1703; }
 }

@@ -66,6 +66,8 @@ public class MarketingDbContext : DbContext
     public DbSet<RecommendationEvidence> RecommendationEvidence => Set<RecommendationEvidence>();
     public DbSet<UsageEvent> UsageEvents => Set<UsageEvent>();
     public DbSet<OwnerReport> OwnerReports => Set<OwnerReport>();
+    public DbSet<Conversation> Conversations => Set<Conversation>();
+    public DbSet<ConversationMessage> ConversationMessages => Set<ConversationMessage>();
 
     // UpdatedAt is set here for every modified row, so no service can forget it.
     // (On insert it is filled by the SYSDATETIMEOFFSET() default.)
