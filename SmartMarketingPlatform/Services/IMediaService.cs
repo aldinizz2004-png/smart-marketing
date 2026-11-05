@@ -9,6 +9,7 @@ public interface IMediaService
     Task<MediaAssetResponse> GetAsync(Guid businessId, Guid id, CancellationToken cancellationToken);
     Task<MediaAssetResponse> UploadAsync(Guid businessId, UploadMediaRequest request, CancellationToken cancellationToken);
     Task<MediaContent> OpenAsync(Guid businessId, Guid id, CancellationToken cancellationToken);
+    Task<MediaAssetResponse> DescribeAsync(Guid businessId, Guid id, bool force, CancellationToken cancellationToken);
     Task DeleteAsync(Guid businessId, Guid id, CancellationToken cancellationToken);
 }
 

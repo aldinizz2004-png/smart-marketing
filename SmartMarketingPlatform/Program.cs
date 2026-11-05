@@ -150,6 +150,7 @@ if (!string.IsNullOrWhiteSpace(keysPath))
 builder.Services.AddSingleton<IFileStorage, LocalFileStorage>();
 builder.Services.AddSingleton<ISecretStore, LocalSecretStore>();
 
+builder.Services.AddScoped<IImageDescriber, ImageDescriber>();
 builder.Services.AddScoped<IMediaService, MediaService>();
 builder.Services.AddScoped<IKnowledgeSourceService, KnowledgeSourceService>();
 builder.Services.AddScoped<ISocialAccountService, SocialAccountService>();

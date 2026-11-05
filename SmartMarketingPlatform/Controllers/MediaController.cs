@@ -59,6 +59,17 @@ public class MediaController(IMediaService media) : ControllerBase
         return File(file.Content, file.MimeType, file.CreatedAt, etag!, enableRangeProcessing: true);
     }
 
+    // The AI looks at the photo: what it shows (reused when writing posts) and what makes it weak for an ad.
+    // POST .../media/{id}/describe?force=true looks again.
+    [HttpPost("{id}/describe")]
+    [Authorize(Policy = Policies.CanEdit)]
+    [ProducesResponseType<MediaAssetResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType<ProblemDetails>(StatusCodes.Status502BadGateway)]
+    public async Task<ActionResult<MediaAssetResponse>> Describe(Guid businessId, Guid id, [FromQuery] bool force, CancellationToken cancellationToken)
+        => Ok(await media.DescribeAsync(businessId, id, force, cancellationToken));
+
     [HttpDelete("{id}")]
     [Authorize(Policy = Policies.CanEdit)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
