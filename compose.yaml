@@ -49,6 +49,9 @@ services:
       Postproxy__ApiKey: ${POSTPROXY_API_KEY:-}
       Postproxy__WebhookSecret: ${POSTPROXY_WEBHOOK_SECRET:-}
       Postproxy__PublicBaseUrl: ${PUBLIC_BASE_URL:-}
+      Competitors__Provider: ${COMPETITORS_PROVIDER:-Fake}
+      Competitors__Instagram__BusinessAccountId: ${INSTAGRAM_BUSINESS_ACCOUNT_ID:-}
+      Competitors__Instagram__AccessToken: ${INSTAGRAM_ACCESS_TOKEN:-}
     ports:
       - "${API_HOST_PORT:-8080}:8080"
     volumes:
