@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Text.Json.Nodes;
 using Microsoft.Extensions.Options;
 using SmartMarketingPlatform.Common.Competitors;
@@ -310,6 +311,52 @@ public sealed class FakeMarketingAi(IOptions<AiOptions> options) : IMarketingAi
         }
 
         return Task.FromResult(Result<IReadOnlyList<CompetitorInsightDraft>>(context, insights));
+    }
+
+    // Whole words: "كم" is a price question, "عندكم" is not.
+    private static readonly string[] PriceWords = ["how much", "price", "كم", "بكم", "قديش", "سعر", "السعر", "سعره", "سعرها"];
+    private static readonly string[] GreetingWords = ["hello", "hi", "مرحبا", "مرحبتين", "السلام عليكم", "اهلين", "أهلين", "هاي", "صباح الخير", "مسا الخير", "مساء الخير"];
+
+    public Task<AiCallResult<CustomerReplyDraft>> ReplyToCustomerAsync(MarketingContext context, ChatThread thread, CancellationToken cancellationToken)
+    {
+        var ar = context.Dialect is null || context.Dialect.Contains("Arabic", StringComparison.OrdinalIgnoreCase);
+        var waiting = thread.Lines.Reverse().TakeWhile(l => l.FromCustomer).Reverse().Select(l => l.Text).ToList();
+        var text = string.Join(" ", waiting.Count > 0 ? waiting : thread.Lines.Where(l => l.FromCustomer).TakeLast(1).Select(l => l.Text));
+        var name = string.IsNullOrWhiteSpace(thread.CustomerName) ? "" : " " + thread.CustomerName.Split(' ')[0];
+
+        bool Has(string[] words) => words.Any(w => text.Contains(w, StringComparison.OrdinalIgnoreCase));
+        bool HasWord(string[] words) => words.Any(w => Regex.IsMatch(
+            text, $@"(?<!\w){Regex.Escape(w)}(?!\w)", RegexOptions.IgnoreCase));
+        var product = context.Products.FirstOrDefault(p =>
+            text.Contains(p.Name, StringComparison.OrdinalIgnoreCase)
+            || p.Name.Split(' ').Any(w => w.Length > 3 && text.Contains(w, StringComparison.OrdinalIgnoreCase)));
+        var price = product is null ? null : $"{product.Name} بـ {product.Price:0.##} {product.Currency}";
+
+        CustomerReplyDraft draft;
+        if (Has(ComplaintWords))
+            draft = new(ConversationIntent.Complaint,
+                ar ? $"آسفين كتير{name} على هالتجربة، صاحب المحل رح يتواصل معك هلأ ليحل الموضوع." : $"We are very sorry{name}. The owner will contact you right away.",
+                true, "Complaint: a person should answer", 0.8m);
+        else if (HasWord(PriceWords) && product is not null)
+            draft = new(ConversationIntent.Question,
+                ar ? $"أهلين{name}! {price}. بتحب نجهزلك واحد؟" : $"Hi{name}! {product.Name} is {product.Price:0.##} {product.Currency}. Shall we prepare one for you?",
+                false, null, 0.85m);
+        else if (HasWord(PriceWords))
+            draft = new(ConversationIntent.Question,
+                ar ? $"أهلين{name}، بتأكدلك من السعر وبرجعلك هلأ." : $"Hi{name}, let me check the price and get back to you.",
+                true, "Asked about something that is not in the product list", 0.4m);
+        else if (Has(BuyWords))
+            draft = new(ConversationIntent.Order,
+                ar ? $"أكيد{name}! {(price is null ? "" : price + ". ")}رح نأكدلك الطلب هلأ." : $"Sure{name}! We will confirm your order right away.",
+                true, "Wants to order: confirm the details and the delivery", 0.8m);
+        else if (HasWord(GreetingWords))
+            draft = new(ConversationIntent.Greeting,
+                ar ? $"أهلين{name}! منورنا بـ {context.BusinessName}، كيف فينا نساعدك؟" : $"Hi{name}! Welcome to {context.BusinessName}, how can we help?",
+                false, null, 0.9m);
+        else
+            draft = new(ConversationIntent.Other, null, true, "Not sure what the customer wants", 0.3m);
+
+        return Task.FromResult(Result(context, draft));
     }
 
     private static string CompetitorTime(string localTime) =>
