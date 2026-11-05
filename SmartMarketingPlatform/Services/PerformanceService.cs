@@ -69,7 +69,12 @@ public sealed class PerformanceService(
         var to = query.To ?? clock.GetUtcNow();
         var from = query.From ?? to.AddDays(-30);
         if (from >= to) throw new BadRequestException("'from' must be before 'to'.");
+        return await ComputeAsync(businessId, from, to, cancellationToken);
+    }
 
+    // No access check: callers have already checked the business (API) or run in the background (reports).
+    public async Task<PerformanceResponse> ComputeAsync(Guid businessId, DateTimeOffset from, DateTimeOffset to, CancellationToken cancellationToken)
+    {
         var rows = await Rows(businessId).Where(r => r.PublishedAt >= from && r.PublishedAt < to).ToListAsync(cancellationToken);
         var latest = await LatestAsync(rows.Select(r => r.Id).ToList(), cancellationToken);
 

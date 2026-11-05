@@ -956,6 +956,82 @@ namespace SmartMarketingPlatform.Migrations
                     b.ToTable("Offers", (string)null);
                 });
 
+            modelBuilder.Entity("SmartMarketingPlatform.Entities.OwnerReport", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ActionsJson")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<Guid>("BusinessId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcernsJson")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetimeoffset")
+                        .HasDefaultValueSql("SYSDATETIMEOFFSET()");
+
+                    b.Property<string>("FactsJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("GeneratedByExecutionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Headline")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<bool>("IsScheduled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset>("PeriodEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset>("PeriodStart")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<DateTimeOffset?>("SentAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("SentTo")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("Summary")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.Property<string>("WinsJson")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("nvarchar(4000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GeneratedByExecutionId");
+
+                    b.HasIndex("BusinessId", "CreatedAt");
+
+                    b.HasIndex("BusinessId", "PeriodEnd")
+                        .IsUnique()
+                        .HasDatabaseName("UX_OwnerReports_Business_PeriodEnd_Scheduled")
+                        .HasFilter("[IsScheduled] = 1");
+
+                    b.ToTable("OwnerReports", (string)null);
+                });
+
             modelBuilder.Entity("SmartMarketingPlatform.Entities.Platform", b =>
                 {
                     b.Property<string>("Code")
@@ -2966,6 +3042,24 @@ namespace SmartMarketingPlatform.Migrations
                     b.Navigation("Business");
 
                     b.Navigation("Status");
+                });
+
+            modelBuilder.Entity("SmartMarketingPlatform.Entities.OwnerReport", b =>
+                {
+                    b.HasOne("SmartMarketingPlatform.Entities.Business", "Business")
+                        .WithMany()
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SmartMarketingPlatform.Entities.AiExecution", "GeneratedByExecution")
+                        .WithMany()
+                        .HasForeignKey("GeneratedByExecutionId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Business");
+
+                    b.Navigation("GeneratedByExecution");
                 });
 
             modelBuilder.Entity("SmartMarketingPlatform.Entities.PlatformDomain", b =>
