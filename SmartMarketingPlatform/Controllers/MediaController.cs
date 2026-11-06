@@ -1,7 +1,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Net.Http.Headers;
 using SmartMarketingPlatform.Common.Auth;
+using SmartMarketingPlatform.Common.RateLimiting;
 using SmartMarketingPlatform.Common.Pagination;
 using SmartMarketingPlatform.DTOs.Media;
 using SmartMarketingPlatform.Services;
@@ -62,6 +64,7 @@ public class MediaController(IMediaService media) : ControllerBase
     // The AI looks at the photo: what it shows (reused when writing posts) and what makes it weak for an ad.
     // POST .../media/{id}/describe?force=true looks again.
     [HttpPost("{id}/describe")]
+    [EnableRateLimiting(RateLimitPolicies.Expensive)]
     [Authorize(Policy = Policies.CanEdit)]
     [ProducesResponseType<MediaAssetResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]

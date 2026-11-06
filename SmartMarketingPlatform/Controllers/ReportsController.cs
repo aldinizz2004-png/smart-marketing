@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SmartMarketingPlatform.Common.Auth;
+using SmartMarketingPlatform.Common.RateLimiting;
 using SmartMarketingPlatform.Common.Pagination;
 using SmartMarketingPlatform.DTOs.Reports;
 using SmartMarketingPlatform.Services;
@@ -35,6 +37,7 @@ public class ReportsController(IReportService reports) : ControllerBase
 
     // POST .../reports  { "days": 7, "send": true }
     [HttpPost]
+    [EnableRateLimiting(RateLimitPolicies.Expensive)]
     [Authorize(Policy = Policies.CanEdit)]
     [ProducesResponseType<ReportResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SmartMarketingPlatform.Common.Auth;
+using SmartMarketingPlatform.Common.RateLimiting;
 using SmartMarketingPlatform.DTOs.Auth;
 using SmartMarketingPlatform.Services;
 
@@ -14,6 +16,7 @@ public class AuthController(IAuthService auth, ICurrentUser currentUser) : Contr
     // POST /api/auth/register -> 201 + Location: /api/me
     [HttpPost("register")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
     [ProducesResponseType<AuthResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status409Conflict)]
@@ -26,6 +29,7 @@ public class AuthController(IAuthService auth, ICurrentUser currentUser) : Contr
     // POST /api/auth/login -> 200 tokens ; 401 wrong email/password ; 403 no active tenant
     [HttpPost("login")]
     [AllowAnonymous]
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
     [ProducesResponseType<AuthResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status401Unauthorized)]

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SmartMarketingPlatform.Common.Auth;
+using SmartMarketingPlatform.Common.RateLimiting;
 using SmartMarketingPlatform.Common.Pagination;
 using SmartMarketingPlatform.DTOs.Comments;
 using SmartMarketingPlatform.Services;
@@ -30,6 +32,7 @@ public class CommentsController(ICommentService comments) : ControllerBase
 
     // Pulls the latest comments of the last 30 days of publications (webhooks bring new ones automatically).
     [HttpPost("sync")]
+    [EnableRateLimiting(RateLimitPolicies.Expensive)]
     [Authorize(Policy = Policies.CanEdit)]
     [ProducesResponseType<CommentSyncResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]
@@ -39,6 +42,7 @@ public class CommentsController(ICommentService comments) : ControllerBase
 
     // The AI classifies the new comments and suggests replies.
     [HttpPost("analyze")]
+    [EnableRateLimiting(RateLimitPolicies.Expensive)]
     [Authorize(Policy = Policies.CanEdit)]
     [ProducesResponseType<CommentAnalysisResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]

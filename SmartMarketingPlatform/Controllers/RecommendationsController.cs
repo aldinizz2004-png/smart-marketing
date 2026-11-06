@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SmartMarketingPlatform.Common.Auth;
+using SmartMarketingPlatform.Common.RateLimiting;
 using SmartMarketingPlatform.Common.Pagination;
 using SmartMarketingPlatform.DTOs.Common;
 using SmartMarketingPlatform.DTOs.Content;
@@ -42,6 +44,7 @@ public class RecommendationsController(IStrategyService strategy, IContentServic
     // POST .../recommendations/{id}/apply -> an accepted NewContent recommendation becomes a content item
     // written by the AI (201, Location = the new content item). The recommendation becomes Applied.
     [HttpPost("{id}/apply")]
+    [EnableRateLimiting(RateLimitPolicies.Expensive)]
     [Authorize(Policy = Policies.CanEdit)]
     [ProducesResponseType<ContentItemResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status400BadRequest)]

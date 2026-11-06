@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SmartMarketingPlatform.Common.Auth;
+using SmartMarketingPlatform.Common.RateLimiting;
 using SmartMarketingPlatform.Common.Pagination;
 using SmartMarketingPlatform.DTOs.Campaigns;
 using SmartMarketingPlatform.DTOs.Common;
@@ -62,6 +64,7 @@ public class CampaignsController(ICampaignService campaigns) : ControllerBase
 
     // POST .../plans -> the AI writes a new plan version (201). AI failure -> 502.
     [HttpPost("{id}/plans")]
+    [EnableRateLimiting(RateLimitPolicies.Expensive)]
     [Authorize(Policy = Policies.CanEdit)]
     [ProducesResponseType<CampaignPlanResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]

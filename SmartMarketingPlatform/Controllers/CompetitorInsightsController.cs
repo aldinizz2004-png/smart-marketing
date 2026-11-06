@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SmartMarketingPlatform.Common.Auth;
+using SmartMarketingPlatform.Common.RateLimiting;
 using SmartMarketingPlatform.DTOs.Competitors;
 using SmartMarketingPlatform.Services;
 
@@ -21,6 +23,8 @@ public class CompetitorInsightsController(ICompetitorService competitors) : Cont
         => Ok(await competitors.GetLatestInsightsAsync(businessId, cancellationToken));
 
     [HttpPost("analyze")]
+
+    [EnableRateLimiting(RateLimitPolicies.Expensive)]
     [Authorize(Policy = Policies.CanEdit)]
     [ProducesResponseType<InsightAnalysisResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ProblemDetails>(StatusCodes.Status403Forbidden)]

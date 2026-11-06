@@ -23,6 +23,7 @@ using SmartMarketingPlatform.Common.Messaging;
 using SmartMarketingPlatform.Common.Notifications;
 using SmartMarketingPlatform.Common.Reports;
 using SmartMarketingPlatform.Common.Options;
+using SmartMarketingPlatform.Common.RateLimiting;
 using SmartMarketingPlatform.Common.Publishing;
 using SmartMarketingPlatform.Common.Secrets;
 using SmartMarketingPlatform.Common.Storage;
@@ -113,6 +114,9 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database");
+
+// Requests per minute: per user for everything, per IP for login/register, per tenant for AI calls (429 + Retry-After).
+builder.Services.AddAppRateLimiting(builder.Configuration);
 
 // ---- Application services ---------------------------------------------------
 builder.Services.Configure<SubscriptionPricingOptions>(builder.Configuration.GetSection(SubscriptionPricingOptions.SectionName));
@@ -294,11 +298,13 @@ if (!app.Configuration.GetValue<bool>("DOTNET_RUNNING_IN_CONTAINER"))
     app.UseHttpsRedirection();
 
 app.UseAuthentication();        // who are you? (reads the Bearer token)
+app.UseRateLimiter();           // how often? (after authentication, so limits can be per user and per tenant)
 app.UseAuthorization();         // are you allowed? (policies, roles)
 
 app.MapControllers();
 app.MapHealthChecks("/health", new HealthCheckOptions { ResponseWriter = HealthResponseWriter.WriteAsync })
-   .AllowAnonymous();
+   .AllowAnonymous()
+   .DisableRateLimiting();      // monitoring and Docker check it often
 
 // Docker: apply the existing migrations before the API and the publishing worker start.
 await DatabaseMigrator.ApplyMigrationsAsync(app);

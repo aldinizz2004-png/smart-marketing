@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SmartMarketingPlatform.Common.Auth;
+using SmartMarketingPlatform.Common.RateLimiting;
 using SmartMarketingPlatform.Common.Pagination;
 using SmartMarketingPlatform.DTOs.Strategy;
 using SmartMarketingPlatform.Services;
@@ -17,6 +19,7 @@ public class StrategyRunsController(IStrategyService strategy) : ControllerBase
 {
     // POST .../strategy-runs { "campaignId": "...", "windowDays": 7 } -> 201 run with its recommendations
     [HttpPost]
+    [EnableRateLimiting(RateLimitPolicies.Expensive)]
     [Authorize(Policy = Policies.CanEdit)]
     [ProducesResponseType<StrategyRunResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]

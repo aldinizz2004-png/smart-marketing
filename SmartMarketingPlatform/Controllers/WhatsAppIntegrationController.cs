@@ -4,6 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using SmartMarketingPlatform.Common.Integrations.WhatsApp;
 using SmartMarketingPlatform.Common.Messaging;
@@ -15,6 +16,7 @@ namespace SmartMarketingPlatform.Controllers;
 [ApiController]
 [Route("api/integrations/whatsapp/webhook")]
 [AllowAnonymous]
+[DisableRateLimiting]
 public class WhatsAppIntegrationController(
     IWhatsAppInboxService inbox,
     IOptions<WhatsAppOptions> options,
