@@ -27,6 +27,7 @@ using SmartMarketingPlatform.Common.Publishing;
 using SmartMarketingPlatform.Common.Secrets;
 using SmartMarketingPlatform.Common.Storage;
 using SmartMarketingPlatform.Common.Statuses;
+using SmartMarketingPlatform.Common.Subscriptions;
 using SmartMarketingPlatform.Data;
 using SmartMarketingPlatform.Entities;
 using SmartMarketingPlatform.Enums;
@@ -128,6 +129,7 @@ builder.Services.AddScoped<PlatformDetector>();
 builder.Services.AddScoped<ILookupService, LookupService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
+builder.Services.AddScoped<IPlanLimits, PlanLimits>();
 builder.Services.AddScoped<ISubscriptionService, SubscriptionService>();
 builder.Services.AddScoped<ITenantService, TenantService>();
 

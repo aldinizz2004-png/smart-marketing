@@ -25,6 +25,7 @@ public class SubscriptionConfiguration : IEntityTypeConfiguration<Subscription>
             .HasForeignKey<Subscription>(x => x.RenewedFromSubscriptionId);
 
         builder.Property(x => x.Duration).HasConversion<byte>();   // stored as 1, 3 or 12
+        builder.Property(x => x.Plan).HasConversion<string>().HasMaxLength(20);
         builder.Property(x => x.Price).HasPrecision(12, 2);
         builder.Property(x => x.Currency).HasMaxLength(3).IsFixedLength().IsRequired();
 

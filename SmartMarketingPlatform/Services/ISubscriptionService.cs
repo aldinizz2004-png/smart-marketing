@@ -14,4 +14,6 @@ public interface ISubscriptionService
     Task<SubscriptionResponse> CreateAsync(CreateSubscriptionRequest request, CancellationToken cancellationToken);
     Task<SubscriptionResponse> ActivateAsync(Guid id, ActivateSubscriptionRequest request, CancellationToken cancellationToken);
     Task<SubscriptionResponse> CancelAsync(Guid id, CancellationToken cancellationToken);
+
+    IReadOnlyList<PlanResponse> GetPlans();
 }

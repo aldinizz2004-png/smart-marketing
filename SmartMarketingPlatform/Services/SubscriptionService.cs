@@ -5,10 +5,12 @@ using SmartMarketingPlatform.Common.Errors;
 using SmartMarketingPlatform.Common.Options;
 using SmartMarketingPlatform.Common.Pagination;
 using SmartMarketingPlatform.Common.Statuses;
+using SmartMarketingPlatform.Common.Subscriptions;
 using SmartMarketingPlatform.Data;
 using SmartMarketingPlatform.Data.Seed;
 using SmartMarketingPlatform.DTOs.Subscriptions;
 using SmartMarketingPlatform.Entities;
+using SmartMarketingPlatform.Enums;
 
 namespace SmartMarketingPlatform.Services;
 
@@ -20,6 +22,7 @@ public sealed class SubscriptionService(
     ICurrentUser currentUser,
     StatusCatalog statuses,
     IOptions<SubscriptionPricingOptions> pricing,
+    IPlanLimits planLimits,
     TimeProvider clock) : ISubscriptionService
 {
     public async Task<PagedResult<SubscriptionResponse>> GetHistoryAsync(PageQuery page, CancellationToken cancellationToken)
@@ -48,9 +51,10 @@ public sealed class SubscriptionService(
 
     public async Task<SubscriptionResponse> CreateAsync(CreateSubscriptionRequest request, CancellationToken cancellationToken)
     {
+        var plan = request.Plan ?? SubscriptionPlan.Basic;
         var duration = request.Duration!.Value;
-        if (!pricing.Value.Prices.TryGetValue(duration, out var price))
-            throw new BadRequestException($"No price is configured for {duration}.");
+        if (!pricing.Value.Plans.TryGetValue(plan, out var planOptions) || !planOptions.Prices.TryGetValue(duration, out var price))
+            throw new BadRequestException($"No price is configured for the {plan} plan for {duration}.");
 
         if (await TenantSubscriptions().AnyAsync(s => s.StatusId == StatusIds.Subscription.Pending, cancellationToken))
             throw new ConflictException("A subscription is already awaiting payment. Activate or cancel it first.");
@@ -66,6 +70,7 @@ public sealed class SubscriptionService(
         var subscription = new Subscription
         {
             TenantId = currentUser.TenantId,
+            Plan = plan,
             Duration = duration,
             Price = price,
             Currency = pricing.Value.Currency,
@@ -139,8 +144,15 @@ public sealed class SubscriptionService(
         await TenantSubscriptions().FirstOrDefaultAsync(s => s.Id == id, cancellationToken)
         ?? throw new NotFoundException("Subscription not found.");
 
+    public IReadOnlyList<PlanResponse> GetPlans() => pricing.Value.Plans
+        .OrderBy(p => p.Key)
+        .Select(p => new PlanResponse(p.Key, p.Value.MaxPostsPerDay, pricing.Value.Currency, p.Value.Prices))
+        .ToList();
+
     private SubscriptionResponse ToResponse(Subscription s, DateTimeOffset now) => new(
         s.Id,
+        s.Plan,
+        planLimits.Describe(s.Plan).MaxPostsPerDay,
         s.Duration,
         s.Price,
         s.Currency,

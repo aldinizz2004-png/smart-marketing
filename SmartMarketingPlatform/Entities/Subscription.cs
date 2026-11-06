@@ -9,6 +9,7 @@ public class Subscription
 {
     public Guid Id { get; set; }
     public Guid TenantId { get; set; }                    // the tenant is the paying customer
+    public SubscriptionPlan Plan { get; set; }            // what the period allows (posts per day ...)
     public SubscriptionDuration Duration { get; set; }
     public decimal Price { get; set; }                    // price paid for this period
     public string Currency { get; set; } = "USD";
