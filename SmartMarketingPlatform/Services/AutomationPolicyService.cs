@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using SmartMarketingPlatform.Common.Auth;
 using SmartMarketingPlatform.Common.Businesses;
 using SmartMarketingPlatform.Common.Errors;
+using SmartMarketingPlatform.Common.Subscriptions;
 using SmartMarketingPlatform.Data;
 using SmartMarketingPlatform.DTOs.Automation;
 using SmartMarketingPlatform.Entities;
@@ -12,7 +13,8 @@ namespace SmartMarketingPlatform.Services;
 public sealed class AutomationPolicyService(
     MarketingDbContext db,
     IBusinessAccess access,
-    ICurrentUser currentUser) : IAutomationPolicyService
+    ICurrentUser currentUser,
+    IPlanLimits planLimits) : IAutomationPolicyService
 {
     private const string TimeFormat = "HH:mm";
 
@@ -20,7 +22,8 @@ public sealed class AutomationPolicyService(
     {
         await access.GetAsync(businessId, cancellationToken);
         var policy = await LoadAsync(businessId, cancellationToken);
-        return policy is null ? Defaults(businessId) : ToResponse(policy);
+        var plan = await planLimits.GetForBusinessAsync(businessId, cancellationToken);
+        return policy is null ? Defaults(businessId, plan) : ToResponse(policy, plan);
     }
 
     public async Task<(AutomationPolicyResponse Policy, bool Created)> UpsertAsync(
@@ -37,6 +40,12 @@ public sealed class AutomationPolicyService(
             throw new BadRequestException("publishWindowStart must be before publishWindowEnd.");
         if (request.BudgetCurrency is not null && request.MonthlyAdBudget is null)
             throw new BadRequestException("budgetCurrency needs monthlyAdBudget.");
+
+        // The plan decides the most posts a day; the owner may choose fewer.
+        var plan = await planLimits.GetForBusinessAsync(businessId, cancellationToken);
+        if (request.MaxPostsPerDay > plan.MaxPostsPerDay)
+            throw new BadRequestException(
+                $"Your {plan.Plan} plan allows at most {plan.MaxPostsPerDay} posts per day. Choose {plan.MaxPostsPerDay} or less, or upgrade the plan.");
 
         var platformCodes = request.AllowedPlatforms
             .Select(c => (c ?? string.Empty).Trim().ToLowerInvariant())
@@ -87,7 +96,7 @@ public sealed class AutomationPolicyService(
             policy.AutoApplyRules.Add(new AutoApplyRule { BusinessId = businessId, ActionType = action });
 
         await db.SaveChangesAsync(cancellationToken);
-        return (ToResponse(policy), created);
+        return (ToResponse(policy, plan), created);
     }
 
     private Task<AutomationPolicy?> LoadAsync(Guid businessId, CancellationToken cancellationToken) =>
@@ -98,14 +107,18 @@ public sealed class AutomationPolicyService(
             .FirstOrDefaultAsync(p => p.BusinessId == businessId, cancellationToken);
 
     // Never configured = automation off: nothing is published without the owner.
-    private static AutomationPolicyResponse Defaults(Guid businessId) => new(
-        businessId, false, false, 3, null, null, null, null, null, false, false, [], [], null, null);
+    private static AutomationPolicyResponse Defaults(Guid businessId, PlanInfo plan) => new(
+        businessId, false, false, (short)plan.MaxPostsPerDay, plan.Plan, plan.MaxPostsPerDay,
+        null, null, null, null, null, false, false, [], [], null, null);
 
-    private static AutomationPolicyResponse ToResponse(AutomationPolicy p) => new(
+    // MaxPostsPerDay is what really applies: after a downgrade the plan wins over a higher saved value.
+    private static AutomationPolicyResponse ToResponse(AutomationPolicy p, PlanInfo plan) => new(
         p.BusinessId,
         true,
         p.AutomationEnabled,
-        p.MaxPostsPerDay,
+        (short)DailyPostLimit.Combine(p.MaxPostsPerDay, plan).Value,
+        plan.Plan,
+        plan.MaxPostsPerDay,
         p.PublishWindowStart?.ToString(TimeFormat, CultureInfo.InvariantCulture),
         p.PublishWindowEnd?.ToString(TimeFormat, CultureInfo.InvariantCulture),
         p.MaxDiscountPercent,

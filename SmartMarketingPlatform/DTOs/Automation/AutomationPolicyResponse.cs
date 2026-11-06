@@ -9,6 +9,8 @@ public sealed record AutomationPolicyResponse(
     bool IsConfigured,
     bool AutomationEnabled,
     short MaxPostsPerDay,
+    SubscriptionPlan Plan,
+    int PlanMaxPostsPerDay,          // the most the current plan allows; MaxPostsPerDay can never be higher
     string? PublishWindowStart,
     string? PublishWindowEnd,
     decimal? MaxDiscountPercent,
