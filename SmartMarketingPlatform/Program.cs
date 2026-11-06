@@ -30,6 +30,7 @@ using SmartMarketingPlatform.Common.Secrets;
 using SmartMarketingPlatform.Common.Storage;
 using SmartMarketingPlatform.Common.Statuses;
 using SmartMarketingPlatform.Common.Subscriptions;
+using SmartMarketingPlatform.Common.Web;
 using SmartMarketingPlatform.Data;
 using SmartMarketingPlatform.Entities;
 using SmartMarketingPlatform.Enums;
@@ -121,6 +122,9 @@ builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database");
 
 // Requests per minute: per user for everything, per IP for login/register, per tenant for AI calls (429 + Retry-After).
 builder.Services.AddAppRateLimiting(builder.Configuration);
+
+// The web app (web/) calls the API from its own origin: Cors:AllowedOrigins.
+builder.Services.AddAppCors(builder.Configuration);
 
 // ---- Application services ---------------------------------------------------
 builder.Services.Configure<SubscriptionPricingOptions>(builder.Configuration.GetSection(SubscriptionPricingOptions.SectionName));
@@ -307,6 +311,7 @@ if (app.Environment.IsDevelopment() || app.Configuration.GetValue<bool>("Swagger
 if (!app.Configuration.GetValue<bool>("DOTNET_RUNNING_IN_CONTAINER"))
     app.UseHttpsRedirection();
 
+app.UseCors();                  // before authentication and rate limiting: browser preflights end here
 app.UseAuthentication();        // who are you? (reads the Bearer token)
 app.UseMiddleware<RequestLogContextMiddleware>();  // user, tenant and business on every log line from here on
 app.UseRateLimiter();           // how often? (after authentication, so limits can be per user and per tenant)
