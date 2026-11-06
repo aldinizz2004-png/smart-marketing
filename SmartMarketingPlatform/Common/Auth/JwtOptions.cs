@@ -10,5 +10,9 @@ public sealed class JwtOptions
     public string Issuer { get; init; } = string.Empty;
     public string Audience { get; init; } = string.Empty;
     public string Key { get; init; } = string.Empty;
-    public int ExpiryMinutes { get; init; } = 60;
+    public int ExpiryMinutes { get; init; } = 15;               // access token: short, so a stolen one dies fast
+    public int RefreshTokenDays { get; init; } = 30;            // refresh token: renewed on every use
+
+    // Two requests that refresh with the same token at once (two browser tabs) are not an attack.
+    public int RefreshReuseGraceSeconds { get; init; } = 30;
 }
