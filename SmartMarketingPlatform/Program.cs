@@ -227,6 +227,10 @@ builder.Services.AddScoped<ICommentService, CommentService>();
 if (builder.Configuration.GetValue("Publishing:WorkerEnabled", true))
     builder.Services.AddHostedService<PublishingWorker>();
 
+builder.Services.Configure<CommentOptions>(builder.Configuration.GetSection(CommentOptions.SectionName));
+if (builder.Configuration.GetValue("Comments:WorkerEnabled", true))
+    builder.Services.AddHostedService<CommentWorker>();
+
 // Weekly owner reports, sent by email (Email:Provider = File in development: .html files in App_Data/outbox).
 builder.Services.Configure<ReportOptions>(builder.Configuration.GetSection(ReportOptions.SectionName));
 builder.Services.Configure<EmailOptions>(builder.Configuration.GetSection(EmailOptions.SectionName));
