@@ -19,6 +19,7 @@ using SmartMarketingPlatform.Common.Competitors;
 using SmartMarketingPlatform.Common.Integrations.Instagram;
 using SmartMarketingPlatform.Common.Integrations.Postproxy;
 using SmartMarketingPlatform.Common.Integrations.WhatsApp;
+using SmartMarketingPlatform.Common.Logging;
 using SmartMarketingPlatform.Common.Messaging;
 using SmartMarketingPlatform.Common.Notifications;
 using SmartMarketingPlatform.Common.Reports;
@@ -36,6 +37,7 @@ using SmartMarketingPlatform.Services;
 using SmartMarketingPlatform.Workers;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.AddAppLogging();
 
 var connectionString = builder.Configuration.GetConnectionString("MarketingDb")
     ?? throw new InvalidOperationException("Connection string 'MarketingDb' was not found.");
@@ -93,6 +95,8 @@ builder.Services.AddProblemDetails(options => options.CustomizeProblemDetails = 
 {
     context.ProblemDetails.Instance ??= $"{context.HttpContext.Request.Method} {context.HttpContext.Request.Path}";
     context.ProblemDetails.Extensions["traceId"] = context.HttpContext.TraceIdentifier;
+    if (CorrelationId.Of(context.HttpContext) is { } correlationId)
+        context.ProblemDetails.Extensions["correlationId"] = correlationId;   // the id to search for in the logs
 });
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
@@ -282,7 +286,9 @@ if (whatsApp.WorkerEnabled)
 var app = builder.Build();
 
 // ---- Pipeline (order matters) -----------------------------------------------
-app.UseExceptionHandler();      // first: catches exceptions from everything below
+app.UseMiddleware<CorrelationIdMiddleware>();   // first: every log line of the request carries its id
+app.UseAppRequestLogging();                     // one summary line per request, with its final status code
+app.UseExceptionHandler();      // catches exceptions from everything below
 app.UseStatusCodePages();       // empty 401/403/404/405 responses also get a ProblemDetails body
 
 // Swagger: always in Development; elsewhere only when Swagger__Enabled=true (e.g. the Docker demo).
@@ -298,6 +304,7 @@ if (!app.Configuration.GetValue<bool>("DOTNET_RUNNING_IN_CONTAINER"))
     app.UseHttpsRedirection();
 
 app.UseAuthentication();        // who are you? (reads the Bearer token)
+app.UseMiddleware<RequestLogContextMiddleware>();  // user, tenant and business on every log line from here on
 app.UseRateLimiter();           // how often? (after authentication, so limits can be per user and per tenant)
 app.UseAuthorization();         // are you allowed? (policies, roles)
 
