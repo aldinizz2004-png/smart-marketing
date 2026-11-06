@@ -1,6 +1,7 @@
 import { CalendarCheck, Gauge, Hourglass, MessageCircleWarning, Sparkles, type LucideIcon } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
+import { useSession } from '@/auth/use-session'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/cn'
@@ -16,6 +17,8 @@ const stats: Stat[] = [
 
 export function HomePage() {
   const { t } = useTranslation()
+  const session = useSession()
+  const firstName = (session.user.fullName ?? '').trim().split(/\s+/)[0]
 
   return (
     <div className="space-y-6">
@@ -23,7 +26,7 @@ export function HomePage() {
         <div className="pointer-events-none absolute -top-16 -end-16 size-56 rounded-full bg-lime-accent/40 blur-3xl" aria-hidden />
         <div className="pointer-events-none absolute -bottom-20 start-1/3 size-56 rounded-full bg-sun-400/30 blur-3xl" aria-hidden />
         <div className="relative max-w-xl">
-          <h1 className="text-3xl font-bold md:text-4xl">{t('home.greeting')}</h1>
+          <h1 className="text-3xl font-bold md:text-4xl">{firstName ? t('home.greetingName', { name: firstName }) : t('home.greeting')}</h1>
           <p className="mt-3 text-lg text-brand-50/90">{t('home.intro')}</p>
           <Link to="/content" className={cn(buttonVariants({ variant: 'sun', size: 'lg' }), 'mt-6')}>
             <Sparkles aria-hidden />
