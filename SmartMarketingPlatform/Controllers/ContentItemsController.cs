@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SmartMarketingPlatform.Common.Auth;
+using SmartMarketingPlatform.Common.RateLimiting;
 using SmartMarketingPlatform.Common.Pagination;
 using SmartMarketingPlatform.DTOs.Common;
 using SmartMarketingPlatform.DTOs.Content;
@@ -31,6 +33,7 @@ public class ContentItemsController(IContentService content) : ControllerBase
 
     // POST -> new Draft with revision 1 (written by you, or by the AI with firstRevision.generateWithAi = true)
     [HttpPost]
+    [EnableRateLimiting(RateLimitPolicies.Expensive)]
     [Authorize(Policy = Policies.CanEdit)]
     [ProducesResponseType<ContentItemResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]
@@ -45,6 +48,7 @@ public class ContentItemsController(IContentService content) : ControllerBase
 
     // POST .../revisions -> a new version of the text (an approved item goes back to Draft)
     [HttpPost("{id}/revisions")]
+    [EnableRateLimiting(RateLimitPolicies.Expensive)]
     [Authorize(Policy = Policies.CanEdit)]
     [ProducesResponseType<ContentItemResponse>(StatusCodes.Status201Created)]
     [ProducesResponseType<ValidationProblemDetails>(StatusCodes.Status400BadRequest)]

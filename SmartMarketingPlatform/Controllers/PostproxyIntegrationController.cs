@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 using SmartMarketingPlatform.Common.Integrations.Postproxy;
 using SmartMarketingPlatform.DTOs.Social;
@@ -13,6 +14,7 @@ namespace SmartMarketingPlatform.Controllers;
 [ApiController]
 [Route("api/integrations/postproxy")]
 [AllowAnonymous]
+[DisableRateLimiting]
 public class PostproxyIntegrationController(
     ISocialConnectionService connections,
     IPostproxyWebhookService webhooks,
