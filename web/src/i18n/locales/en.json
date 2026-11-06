@@ -1,0 +1,56 @@
+{
+  "app": {
+    "name": "Smart Marketing",
+    "tagline": "AI marketing for your shop"
+  },
+  "nav": {
+    "home": "Home",
+    "content": "Content",
+    "comments": "Comments",
+    "settings": "Settings",
+    "main": "Main menu"
+  },
+  "actions": {
+    "switchLanguage": "العربية",
+    "switchLanguageLabel": "Switch to Arabic",
+    "darkMode": "Dark mode",
+    "lightMode": "Light mode",
+    "createPost": "Create a post",
+    "backHome": "Back to home"
+  },
+  "api": {
+    "online": "Connected",
+    "offline": "Server unavailable",
+    "checking": "Connecting..."
+  },
+  "home": {
+    "greeting": "Welcome 👋",
+    "intro": "Follow your posts and your customers' comments here, with AI helping at every step.",
+    "stats": {
+      "publishedToday": "Published today",
+      "awaitingReview": "Awaiting your review",
+      "complaints": "Complaints to answer",
+      "postsLeft": "Posts left today"
+    }
+  },
+  "pages": {
+    "content": {
+      "title": "Content",
+      "subtitle": "Campaigns, posts and scheduling"
+    },
+    "comments": {
+      "title": "Comments",
+      "subtitle": "Customer comments with suggested replies"
+    },
+    "settings": {
+      "title": "Settings",
+      "subtitle": "Shop, team and subscription"
+    },
+    "soon": "This page is being prepared",
+    "soonHint": "We are working on it, and it will appear here soon."
+  },
+  "notFound": {
+    "title": "Page not found",
+    "hint": "The link may have changed or been typed incorrectly."
+  }
+}

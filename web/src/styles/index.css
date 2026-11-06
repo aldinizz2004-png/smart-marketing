@@ -1,0 +1,78 @@
+@import 'tailwindcss';
+@import '@fontsource/ibm-plex-sans-arabic/400.css';
+@import '@fontsource/ibm-plex-sans-arabic/500.css';
+@import '@fontsource/ibm-plex-sans-arabic/600.css';
+@import '@fontsource/ibm-plex-sans-arabic/700.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand-50: #ecfdf8;
+  --color-brand-100: #d1faef;
+  --color-brand-200: #a7f3df;
+  --color-brand-300: #6ee7cb;
+  --color-brand-400: #2dd4b0;
+  --color-brand-500: #14b89a;
+  --color-brand-600: #0d947e;
+  --color-brand-700: #0f7667;
+  --color-brand-800: #115e53;
+  --color-brand-900: #134e46;
+  --color-brand-950: #042f2b;
+
+  --color-sun-300: #fcd34d;
+  --color-sun-400: #fbbf24;
+  --color-sun-500: #f59e0b;
+  --color-coral-400: #fb7185;
+  --color-coral-500: #f43f5e;
+  --color-grape-400: #a78bfa;
+  --color-grape-500: #8b5cf6;
+  --color-lime-accent: #a3e635;
+}
+
+/* Surfaces and text change with the theme; brand colors stay the same. */
+:root {
+  --bg: #f2faf8;
+  --surface: #ffffff;
+  --surface-2: #e8f6f2;
+  --ink: #0b1f1c;
+  --muted: #56706b;
+  --line: #d6ebe5;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #061412;
+  --surface: #0c1f1c;
+  --surface-2: #122b27;
+  --ink: #e6f4f1;
+  --muted: #8fa9a3;
+  --line: #1d3a35;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    @apply bg-bg font-sans text-ink antialiased;
+  }
+
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-brand-500;
+  }
+}
