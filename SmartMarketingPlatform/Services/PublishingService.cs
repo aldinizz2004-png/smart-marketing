@@ -4,6 +4,7 @@ using SmartMarketingPlatform.Common.Errors;
 using SmartMarketingPlatform.Common.Pagination;
 using SmartMarketingPlatform.Common.Publishing;
 using SmartMarketingPlatform.Common.Statuses;
+using SmartMarketingPlatform.Common.Subscriptions;
 using SmartMarketingPlatform.Data;
 using SmartMarketingPlatform.Data.Seed;
 using SmartMarketingPlatform.DTOs.Publishing;
@@ -12,13 +13,14 @@ using SmartMarketingPlatform.Enums;
 
 namespace SmartMarketingPlatform.Services;
 
-// Turns approved content into publication jobs, inside the owner's limits:
-// the publish window (business local time) and the maximum posts per day.
+// Turns approved content into publication jobs, inside the limits: the owner's publish window
+// (business local time) and the maximum posts per day (the owner's own limit, capped by the plan).
 public sealed class PublishingService(
     MarketingDbContext db,
     IBusinessAccess access,
     StatusCatalog statuses,
     ISocialPublisher publisher,
+    IPlanLimits planLimits,
     TimeProvider clock,
     ILogger<PublishingService> logger) : IPublishingService
 {
@@ -33,7 +35,7 @@ public sealed class PublishingService(
 
     private static readonly int[] Cancelable = [StatusIds.PublicationJob.Queued, StatusIds.PublicationJob.Retry];
 
-    private sealed record OwnerLimits(TimeZoneInfo TimeZone, TimeOnly? WindowStart, TimeOnly? WindowEnd, short MaxPostsPerDay);
+    private sealed record OwnerLimits(TimeZoneInfo TimeZone, TimeOnly? WindowStart, TimeOnly? WindowEnd, DailyPostLimit Daily);
 
     public async Task<PublicationJobResponse> ScheduleAsync(Guid businessId, Guid contentItemId, ScheduleRequest request, CancellationToken cancellationToken)
     {
@@ -54,8 +56,8 @@ public sealed class PublishingService(
             at = wanted < now ? now : wanted;
             if (!InWindow(at, limits))
                 throw new BadRequestException($"publishAt is outside the owner's publish window ({limits.WindowStart:HH:mm}-{limits.WindowEnd:HH:mm}, {limits.TimeZone.Id}).");
-            if (await CountForDayAsync(businessId, at, limits, cancellationToken) >= limits.MaxPostsPerDay)
-                throw new ConflictException($"The owner's limit of {limits.MaxPostsPerDay} posts per day is already reached for that day.");
+            if (await CountForDayAsync(businessId, at, limits, cancellationToken) >= limits.Daily.Value)
+                throw new ConflictException(limits.Daily.FullDayMessage);
         }
         else
         {
@@ -195,7 +197,7 @@ public sealed class PublishingService(
         for (var day = 0; day < SearchDays; day++)
         {
             at = MoveIntoWindow(at, limits);
-            if (await CountForDayAsync(businessId, at, limits, cancellationToken) < limits.MaxPostsPerDay)
+            if (await CountForDayAsync(businessId, at, limits, cancellationToken) < limits.Daily.Value)
                 return at;
             at = StartOfNextDay(at, limits);
         }
@@ -251,7 +253,7 @@ public sealed class PublishingService(
             TimeZoneInfo.FindSystemTimeZoneById(timeZoneId),
             policy?.PublishWindowStart,
             policy?.PublishWindowEnd,
-            policy?.MaxPostsPerDay ?? 3);
+            DailyPostLimit.Combine(policy?.MaxPostsPerDay, await planLimits.GetForBusinessAsync(businessId, cancellationToken)));
     }
 
     // ---- loading --------------------------------------------------------------------

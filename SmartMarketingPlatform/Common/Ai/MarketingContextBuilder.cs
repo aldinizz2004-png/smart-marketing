@@ -1,5 +1,6 @@
 using System.Globalization;
 using Microsoft.EntityFrameworkCore;
+using SmartMarketingPlatform.Common.Subscriptions;
 using SmartMarketingPlatform.Data;
 using SmartMarketingPlatform.Data.Seed;
 using SmartMarketingPlatform.Enums;
@@ -7,7 +8,7 @@ using SmartMarketingPlatform.Enums;
 namespace SmartMarketingPlatform.Common.Ai;
 
 // Collects what the AI needs to know, from the database, in one place.
-public sealed class MarketingContextBuilder(MarketingDbContext db, TimeProvider clock) : IMarketingContextBuilder
+public sealed class MarketingContextBuilder(MarketingDbContext db, IPlanLimits planLimits, TimeProvider clock) : IMarketingContextBuilder
 {
     private const int MaxItems = 20;
     private const int MaxInsights = 8;
@@ -87,7 +88,7 @@ public sealed class MarketingContextBuilder(MarketingDbContext db, TimeProvider 
             brand?.Terms.Where(t => t.Rule == BrandTermRule.Preferred).Select(t => t.Term).ToList() ?? [],
             brand?.Terms.Where(t => t.Rule == BrandTermRule.Prohibited).Select(t => t.Term).ToList() ?? [],
             products, offers, audiences, channels,
-            policy?.MaxPostsPerDay ?? 3,
+            (short)DailyPostLimit.Combine(policy?.MaxPostsPerDay, await planLimits.GetForTenantAsync(business.TenantId, cancellationToken)).Value,
             policy?.PublishWindowStart?.ToString("HH:mm", CultureInfo.InvariantCulture),
             policy?.PublishWindowEnd?.ToString("HH:mm", CultureInfo.InvariantCulture),
             campaign is null ? null : new CampaignInfo(campaign.Id, campaign.Name, campaign.Objective, campaign.GoalStatement,
