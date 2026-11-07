@@ -40,3 +40,9 @@ export function formatRelative(value: string | null | undefined, language: strin
   for (const [unit, size] of units) if (Math.abs(seconds) >= size) return format.format(Math.round(seconds / size), unit)
   return format.format(0, 'minute')
 }
+
+export function formatBytes(bytes: number | null | undefined, language: string) {
+  if (bytes == null) return '—'
+  const [value, unit] = bytes >= 1024 * 1024 ? [bytes / (1024 * 1024), 'megabyte'] : [bytes / 1024, 'kilobyte']
+  return new Intl.NumberFormat(locale(language), { style: 'unit', unit, unitDisplay: 'short', maximumFractionDigits: 1 }).format(value)
+}

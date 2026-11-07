@@ -10,6 +10,25 @@ export type MediaKind = components['schemas']['MediaKind']
 export const mediaKinds: MediaKind[] = ['ProductPhoto', 'BrandImage', 'Logo', 'GeneratedImage', 'Video', 'Document']
 export const maxUploadBytes = 10 * 1024 * 1024
 
+const MB = 1024 * 1024
+const images = ['image/jpeg', 'image/png', 'image/webp']
+// Mirrors the upload rules of the API, so a wrong file is caught before it is sent.
+export const mediaRules: Record<MediaKind, { types: string[]; maxBytes: number; accept: string }> = {
+  Logo: { types: images, maxBytes: 5 * MB, accept: images.join(',') },
+  ProductPhoto: { types: images, maxBytes: 10 * MB, accept: images.join(',') },
+  BrandImage: { types: images, maxBytes: 10 * MB, accept: images.join(',') },
+  GeneratedImage: { types: images, maxBytes: 10 * MB, accept: images.join(',') },
+  Video: { types: ['video/mp4'], maxBytes: 50 * MB, accept: 'video/mp4' },
+  Document: { types: ['application/pdf', 'text/plain'], maxBytes: 10 * MB, accept: 'application/pdf,text/plain' },
+}
+
+export function checkMediaFile(file: File, kind: MediaKind): 'type' | 'size' | null {
+  const rule = mediaRules[kind]
+  if (file.type && !rule.types.includes(file.type)) return 'type'
+  if (file.size > rule.maxBytes) return 'size'
+  return null
+}
+
 const keys = {
   all: (businessId: string) => ['media', businessId] as const,
   list: (businessId: string, kind?: string, productId?: string, page = 1) => ['media', businessId, 'list', kind ?? '', productId ?? '', page] as const,

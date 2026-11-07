@@ -1,4 +1,4 @@
-import { House, Megaphone, MessageCircleHeart, MessagesSquare, Settings, Sparkles, type LucideIcon } from 'lucide-react'
+import { House, Megaphone, MessageCircleHeart, MessagesSquare, Package, Settings, Sparkles, type LucideIcon } from 'lucide-react'
 
 export type NavItem = {
   to: string
@@ -14,5 +14,6 @@ export const navItems: NavItem[] = [
   { to: '/inbox', labelKey: 'nav.inbox', icon: MessagesSquare, bottom: true },
   { to: '/comments', labelKey: 'nav.comments', icon: MessageCircleHeart, bottom: true },
   { to: '/campaigns', labelKey: 'nav.campaigns', icon: Megaphone },
+  { to: '/catalog', labelKey: 'nav.catalog', icon: Package },
   { to: '/settings', labelKey: 'nav.settings', icon: Settings },
 ]
