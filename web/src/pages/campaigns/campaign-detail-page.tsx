@@ -4,16 +4,17 @@ import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 import { can } from '@/auth/roles'
 import { useSession } from '@/auth/use-session'
+import { ConfirmDialog } from '@/components/confirm-dialog'
 import { ErrorState } from '@/components/error-state'
 import { StatusBadge } from '@/components/status-badge'
+import { Alert } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { buttonVariants } from '@/components/ui/button-variants'
 import { Card } from '@/components/ui/card'
-import { Select } from '@/components/ui/select'
 import { SectionSpinner, Spinner } from '@/components/ui/spinner'
 import { useToast } from '@/components/ui/toast-context'
-import { campaignNext, useCampaign, useCampaignPlans, useChangeCampaignStatus, useGeneratePlan, type CampaignPlan } from '@/features/campaigns/api'
+import { campaignEditable, campaignNext, useCampaign, useCampaignPlans, useChangeCampaignStatus, useGeneratePlan, type CampaignPlan } from '@/features/campaigns/api'
 import { CampaignFormDialog } from '@/features/campaigns/campaign-form-dialog'
 import { useContentItems } from '@/features/content/api'
 import { enumLabel } from '@/features/content/labels'
@@ -30,12 +31,24 @@ export function CampaignDetailPage() {
   const campaign = useCampaign(businessId, id)
   const changeStatus = useChangeCampaignStatus(businessId, id)
   const [editing, setEditing] = useState(false)
+  const [confirmCancel, setConfirmCancel] = useState(false)
   const canEdit = can(session.tenant.role, 'edit')
+  const move = (target: string) =>
+    changeStatus.mutate(target, {
+      onSuccess: () => {
+        setConfirmCancel(false)
+        toast.success(t('common.saved'))
+      },
+      onError: (err) => toast.error(err),
+    })
 
   if (campaign.isPending) return <SectionSpinner />
   if (campaign.isError) return <ErrorState error={campaign.error} onRetry={() => void campaign.refetch()} />
   const c = campaign.data
-  const next = campaignNext[c.status?.code ?? ''] ?? []
+  const code = c.status?.code ?? ''
+  const isAdmin = can(session.tenant.role, 'admin')
+  const next = (campaignNext[code] ?? []).filter((target) => target !== 'Active' || isAdmin)
+  const editable = campaignEditable.includes(code)
 
   return (
     <div className="space-y-6">
@@ -57,29 +70,41 @@ export function CampaignDetailPage() {
         <Info icon={CalendarRange} label={t('campaigns.period')} value={c.startsAt ? `${formatDate(c.startsAt, i18n.language)} – ${formatDate(c.endsAt, i18n.language)}` : '—'} />
         {canEdit && (
           <div className="flex flex-1 flex-wrap justify-end gap-2">
-            {next.length > 0 && (
-              <Select
-                aria-label={t('campaigns.changeStatus')}
-                value=""
+            {next.map((target) => (
+              <Button
+                key={target}
+                size="sm"
+                variant={target === 'Active' ? 'primary' : target === 'Canceled' ? 'ghost' : 'secondary'}
                 disabled={changeStatus.isPending}
-                onChange={(e) => e.target.value && changeStatus.mutate(e.target.value, { onSuccess: () => toast.success(t('common.saved')), onError: (err) => toast.error(err) })}
-                className="h-9 w-48 text-sm"
+                onClick={() => (target === 'Canceled' ? setConfirmCancel(true) : move(target))}
               >
-                <option value="">{t('campaigns.changeStatus')}</option>
-                {next.map((s) => <option key={s} value={s}>{t(`campaigns.moveTo.${s}`)}</option>)}
-              </Select>
+                {t(`campaigns.moveTo.${target}`)}
+              </Button>
+            ))}
+            {editable && (
+              <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>
+                <Pencil aria-hidden />
+                {t('common.edit')}
+              </Button>
             )}
-            <Button variant="secondary" size="sm" onClick={() => setEditing(true)}>
-              <Pencil aria-hidden />
-              {t('common.edit')}
-            </Button>
           </div>
         )}
       </Card>
 
-      <PlanSection campaignId={id} canEdit={canEdit} />
+      {code === 'Draft' && canEdit && <Alert tone="info" title={t('campaigns.draftHint')} />}
+      <PlanSection campaignId={id} canEdit={canEdit && editable} />
       <CampaignPosts campaignId={id} canEdit={canEdit} />
       <CampaignFormDialog open={editing} onClose={() => setEditing(false)} campaign={c} />
+      <ConfirmDialog
+        open={confirmCancel}
+        title={t('campaigns.cancelTitle')}
+        description={t('campaigns.cancelHint')}
+        confirmLabel={t('campaigns.moveTo.Canceled')}
+        danger
+        busy={changeStatus.isPending}
+        onClose={() => setConfirmCancel(false)}
+        onConfirm={() => move('Canceled')}
+      />
     </div>
   )
 }

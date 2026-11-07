@@ -9,12 +9,15 @@ export type CampaignObjective = components['schemas']['CampaignObjective']
 export type CampaignPlanResponse = components['schemas']['CampaignPlanResponse']
 
 export const objectives: CampaignObjective[] = ['Orders', 'Messages', 'Visits', 'Awareness', 'ProductPromotion', 'Followers']
+export const campaignEditable = ['Draft', 'Ready']
+
 export const campaignStatuses = ['Draft', 'Planning', 'Ready', 'Active', 'Paused', 'Completed', 'Canceled'] as const
 
-// Same rules as CampaignService: Draft -> Ready -> Active -> Paused/Completed, and Canceled from anywhere open.
+// What the client may request (CampaignService.ClientTargets): Ready only comes from generating the plan,
+// and starting a campaign (Active) needs the owner or an admin.
 export const campaignNext: Record<string, string[]> = {
-  Draft: ['Ready', 'Canceled'],
-  Planning: ['Ready', 'Draft', 'Canceled'],
+  Draft: ['Canceled'],
+  Planning: ['Draft', 'Canceled'],
   Ready: ['Active', 'Draft', 'Canceled'],
   Active: ['Paused', 'Completed', 'Canceled'],
   Paused: ['Active', 'Completed', 'Canceled'],

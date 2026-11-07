@@ -286,7 +286,7 @@
     "accountId": "Account ID",
     "accountIdHint": "The account number or ID shown in the platform's settings.",
     "accessToken": "Access token",
-    "accessTokenHint": "Stored encrypted and never shown again.",
+    "accessTokenHint": "From the platform's developer settings. Stored encrypted and never shown again.",
     "connect": "Connect account",
     "connected": "Account connected",
     "disconnect": "Disconnect",
@@ -592,7 +592,6 @@
     },
     "moveTo": {
       "Draft": "Back to draft",
-      "Ready": "Ready to launch",
       "Active": "Launch campaign",
       "Paused": "Pause",
       "Completed": "Finish campaign",
@@ -601,7 +600,6 @@
     "empty": "No campaigns yet",
     "emptyHint": "Start with a small campaign for one product.",
     "back": "All campaigns",
-    "changeStatus": "Change status...",
     "posts": "Campaign posts",
     "noPosts": "No posts in this campaign yet.",
     "plan": {
@@ -618,6 +616,9 @@
       "bestTimes": "Best time: {{times}}",
       "mix": "Content mix",
       "themes": "Weekly themes"
-    }
+    },
+    "cancelTitle": "Cancel this campaign?",
+    "cancelHint": "Its posts stay as they are, but the campaign cannot be restarted.",
+    "draftHint": "Make the campaign plan with the AI, and it becomes ready to launch."
   }
 }
