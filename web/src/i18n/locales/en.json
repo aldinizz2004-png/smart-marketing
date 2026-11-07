@@ -58,7 +58,13 @@
   "common": {
     "optional": "optional",
     "loading": "Loading",
-    "close": "Close"
+    "close": "Close",
+    "retry": "Try again",
+    "choose": "Choose...",
+    "remove": "Remove",
+    "save": "Save",
+    "cancel": "Cancel",
+    "saved": "Saved"
   },
   "roles": {
     "Owner": "Owner",
@@ -104,7 +110,9 @@
     "email": "Enter a valid email",
     "tooLong": "The text is too long",
     "passwordLength": "At least 8 characters",
-    "passwordMix": "Use at least one letter and one digit"
+    "passwordMix": "Use at least one letter and one digit",
+    "phone": "Digits only, may start with +",
+    "paymentReference": "Enter the reference (at least 3 characters)"
   },
   "errors": {
     "unexpected": "Something went wrong",
@@ -121,5 +129,206 @@
     "retryAfter": "Try again in {{seconds}} seconds",
     "provider": "The external service did not respond, try again shortly",
     "server": "Server error, try again shortly"
+  },
+  "workspace": {
+    "current": "Current shop",
+    "switch": "Switch shop",
+    "addBusiness": "Add a new shop",
+    "addBusinessHint": "Each shop has its own posts, accounts and reports.",
+    "create": "Create shop",
+    "created": "{{name}} created"
+  },
+  "business": {
+    "name": "Shop name",
+    "category": "Type of business",
+    "customCategory": "Describe the type",
+    "phone": "Contact number",
+    "country": "Country",
+    "city": "City",
+    "address": "Address",
+    "timeZone": "Time zone",
+    "timeZoneHint": "Used for publishing times and reports.",
+    "currency": "Currency",
+    "description": "Short description",
+    "descriptionHint": "What you sell, to whom, and what makes you different. Helps the AI write about you.",
+    "categories": {
+      "Cafe": "Cafe",
+      "Restaurant": "Restaurant",
+      "Bakery": "Bakery",
+      "Sweets": "Sweets",
+      "Clothing": "Clothing",
+      "Beauty": "Beauty & care",
+      "Electronics": "Electronics",
+      "Pharmacy": "Pharmacy",
+      "Supermarket": "Supermarket",
+      "Flowers": "Flowers & gifts",
+      "Gym": "Gym",
+      "Furniture": "Furniture",
+      "Services": "Services",
+      "other": "Something else"
+    }
+  },
+  "countries": {
+    "PS": "Palestine",
+    "JO": "Jordan",
+    "EG": "Egypt",
+    "SA": "Saudi Arabia",
+    "AE": "UAE",
+    "KW": "Kuwait",
+    "QA": "Qatar",
+    "BH": "Bahrain",
+    "OM": "Oman",
+    "LB": "Lebanon",
+    "SY": "Syria",
+    "IQ": "Iraq",
+    "MA": "Morocco",
+    "TN": "Tunisia",
+    "DZ": "Algeria",
+    "LY": "Libya",
+    "TR": "Turkey",
+    "US": "United States",
+    "GB": "United Kingdom",
+    "DE": "Germany"
+  },
+  "currencies": {
+    "ILS": "Shekel",
+    "JOD": "Jordanian dinar",
+    "USD": "US dollar",
+    "EUR": "Euro",
+    "EGP": "Egyptian pound",
+    "SAR": "Saudi riyal",
+    "AED": "UAE dirham",
+    "KWD": "Kuwaiti dinar",
+    "QAR": "Qatari riyal",
+    "BHD": "Bahraini dinar",
+    "OMR": "Omani rial",
+    "LBP": "Lebanese pound",
+    "IQD": "Iraqi dinar",
+    "MAD": "Moroccan dirham",
+    "TND": "Tunisian dinar",
+    "TRY": "Turkish lira",
+    "GBP": "Pound sterling"
+  },
+  "brand": {
+    "dialect": "Writing dialect",
+    "dialectHint": "The AI writes in this dialect.",
+    "tone": "Tone of voice",
+    "emojiLevel": "Emoji",
+    "colors": "Brand colors",
+    "colorN": "Color {{n}}",
+    "addColor": "Add color",
+    "guidelines": "Special instructions",
+    "guidelinesHint": "Anything the AI should know about your style.",
+    "guidelinesPlaceholder": "For example: we never say cheap, and always mention free delivery.",
+    "dialects": {
+      "Palestinian Arabic": "Palestinian",
+      "Jordanian Arabic": "Jordanian",
+      "Levantine Arabic": "Levantine",
+      "Egyptian Arabic": "Egyptian",
+      "Gulf Arabic": "Gulf",
+      "Iraqi Arabic": "Iraqi",
+      "Maghrebi Arabic": "Maghrebi",
+      "Modern Standard Arabic": "Simple standard Arabic",
+      "English": "English"
+    },
+    "tones": {
+      "friendly": "Friendly",
+      "professional": "Professional",
+      "playful": "Playful",
+      "warm": "Warm",
+      "luxurious": "Luxurious",
+      "bold": "Bold"
+    },
+    "emoji": {
+      "0": "None",
+      "1": "A few",
+      "2": "Some",
+      "3": "Lots"
+    }
+  },
+  "social": {
+    "platform": "Platform",
+    "handle": "Username",
+    "accountId": "Account ID",
+    "accountIdHint": "The account number or ID shown in the platform's settings.",
+    "accessToken": "Access token",
+    "accessTokenHint": "Stored encrypted and never shown again.",
+    "connect": "Connect account",
+    "connected": "Account connected",
+    "disconnect": "Disconnect",
+    "none": "No connected accounts yet.",
+    "autoTitle": "Automatic connection",
+    "autoHint": "Open the platform's page, approve the connection and we do the rest.",
+    "autoButton": "Connect automatically",
+    "autoUnavailable": "Automatic connection is not set up yet",
+    "autoUnavailableHint": "You can connect the account by hand with the fields below.",
+    "manualTitle": "Manual connection"
+  },
+  "plans": {
+    "duration": "Subscription length",
+    "durations": {
+      "OneMonth": "1 month",
+      "ThreeMonths": "3 months",
+      "OneYear": "1 year"
+    },
+    "names": {
+      "Basic": "Basic",
+      "Pro": "Pro",
+      "Business": "Business"
+    },
+    "popular": "Most popular",
+    "perMonth": "per month",
+    "monthlyEquivalent": "about {{price}} per month",
+    "choose": "Choose plan",
+    "renew": "Renew plan",
+    "features": {
+      "postsPerDay": "Up to {{count}} posts a day per shop",
+      "ai": "AI-written posts",
+      "comments": "Comment analysis and suggested replies",
+      "reports": "Weekly report by email"
+    },
+    "yourChoice": "You chose",
+    "period": "From {{from}} to {{to}}",
+    "howToPay": "How to pay",
+    "howToPayHint": "For now, payment is by bank transfer or e-wallet. After paying, enter the transfer reference to activate.",
+    "reference": "Transfer reference",
+    "referenceHint": "Kept to match your payment.",
+    "activate": "Activate subscription",
+    "changePlan": "Change plan"
+  },
+  "onboarding": {
+    "progress": "Getting started",
+    "steps": {
+      "plan": "Plan",
+      "business": "Shop",
+      "brand": "Brand",
+      "accounts": "Accounts"
+    },
+    "next": "Next",
+    "skip": "Skip for now",
+    "finish": "Start using it",
+    "skipFinish": "Skip and start",
+    "plan": {
+      "title": "Choose your plan",
+      "subtitle": "You can change or renew it any time.",
+      "payTitle": "Last step: payment",
+      "paySubtitle": "Activate your subscription to start.",
+      "askOwner": "Only the account owner can activate the subscription. Ask them to finish it.",
+      "activated": "Your subscription is active 🎉"
+    },
+    "business": {
+      "title": "Tell us about your shop",
+      "subtitle": "This helps the AI write about you accurately.",
+      "submit": "Save and continue",
+      "askAdmin": "Adding a shop needs admin rights. Ask the account owner to add it."
+    },
+    "brand": {
+      "title": "How does your shop talk?",
+      "subtitle": "Pick the dialect and tone, and the AI writes your posts that way."
+    },
+    "accounts": {
+      "title": "Connect your social accounts",
+      "subtitle": "Connect the accounts you want to post to. You can add more later in settings."
+    }
   }
 }
