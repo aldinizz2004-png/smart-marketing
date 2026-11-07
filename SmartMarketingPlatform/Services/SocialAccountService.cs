@@ -54,7 +54,9 @@ public sealed class SocialAccountService(
 
         var account = existing ?? new SocialAccount { BusinessId = businessId, PlatformCode = platformCode, ExternalAccountId = externalId };
         account.Handle = request.Handle?.Trim().TrimStart('@');
-        await ReplaceCredentialAsync(account, request.AccessToken!, cancellationToken);
+        // The token is optional: providers that publish through their own connection (Postproxy, Fake) never need it.
+        if (!string.IsNullOrWhiteSpace(request.AccessToken))
+            await ReplaceCredentialAsync(account, request.AccessToken, cancellationToken);
         account.StatusId = StatusIds.SocialAccount.Connected;
 
         if (existing is null) db.SocialAccounts.Add(account);
