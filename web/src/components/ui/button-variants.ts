@@ -10,6 +10,8 @@ export const buttonVariants = cva(
         sun: 'bg-sun-400 text-brand-950 shadow-lg shadow-sun-500/25 hover:-translate-y-0.5 hover:bg-sun-300',
         secondary: 'border border-line bg-surface text-ink hover:bg-surface-2',
         ghost: 'text-muted hover:bg-surface-2 hover:text-ink',
+        danger: 'bg-coral-500 text-white shadow-lg shadow-coral-500/25 hover:bg-coral-400',
+        soft: 'bg-brand-100 text-brand-800 hover:bg-brand-200 dark:bg-brand-900/60 dark:text-brand-200 dark:hover:bg-brand-900',
       },
       size: {
         sm: 'h-9 px-3 text-sm',
