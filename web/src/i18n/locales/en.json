@@ -28,12 +28,34 @@
     "greeting": "Welcome 👋",
     "intro": "Follow your posts and your customers' comments here, with AI helping at every step.",
     "stats": {
-      "publishedToday": "Published today",
       "awaitingReview": "Awaiting your review",
       "complaints": "Complaints to answer",
-      "postsLeft": "Posts left today"
+      "conversations": "Chats waiting for you",
+      "scheduled": "Scheduled posts"
     },
-    "greetingName": "Welcome, {{name}} 👋"
+    "greetingName": "Welcome, {{name}} 👋",
+    "attention": "Needs your attention",
+    "more": "More",
+    "week": {
+      "title": "Last 7 days",
+      "posts": "Posts",
+      "reach": "Reach",
+      "engagement": "Engagement",
+      "empty": "Nothing published this week yet. Your first post starts here!",
+      "avgReach": "avg {{value}}"
+    },
+    "upcoming": {
+      "title": "Coming up",
+      "empty": "No scheduled posts."
+    },
+    "report": "Weekly report up to {{date}}",
+    "setup": {
+      "title": "Finish setting up your shop",
+      "subtitle": "Three small steps that make the results much better.",
+      "brand": "Describe your brand",
+      "account": "Connect a social account",
+      "product": "Add your first product"
+    }
   },
   "pages": {
     "content": {
