@@ -4,7 +4,7 @@ import { EmptyState } from '@/components/empty-state'
 import { PageHeader } from '@/components/page-header'
 
 type ComingSoonPageProps = {
-  page: 'content' | 'comments' | 'settings'
+  page: 'comments' | 'settings'
   icon: LucideIcon
 }
 

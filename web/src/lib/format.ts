@@ -1,17 +1,13 @@
 // Arabic text with Western digits, as shops in the region usually write prices.
 const locale = (language: string) => (language === 'ar' ? 'ar-u-nu-latn' : 'en-GB')
 
+const symbols: Record<string, string> = { USD: '$', EUR: '€', GBP: '£', ILS: '₪', TRY: '₺' }
+
+// Built by hand: Intl writes "US$" in Arabic. The isolate marks keep "$45" or "45 JOD" in one piece inside Arabic text.
 export function formatMoney(value: number, currency: string, language: string) {
-  try {
-    return new Intl.NumberFormat(locale(language), {
-      style: 'currency',
-      currency,
-      currencyDisplay: 'narrowSymbol',
-      maximumFractionDigits: value % 1 === 0 ? 0 : 2,
-    }).format(value)
-  } catch {
-    return `${value} ${currency}`
-  }
+  const amount = new Intl.NumberFormat(locale(language), { maximumFractionDigits: value % 1 === 0 ? 0 : 2 }).format(value)
+  const symbol = symbols[currency]
+  return `\u2066${symbol ? `${symbol}${amount}` : `${amount} ${currency}`}\u2069`
 }
 
 export function formatNumber(value: number | null | undefined, language: string, digits = 0) {

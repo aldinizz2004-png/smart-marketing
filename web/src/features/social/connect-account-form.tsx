@@ -20,7 +20,7 @@ const schema = z.object({
   platformCode: z.string().min(1, 'validation.required'),
   handle: z.string().trim().max(100, 'validation.tooLong'),
   externalAccountId: z.string().trim().min(1, 'validation.required').max(200, 'validation.tooLong'),
-  accessToken: z.string().trim().max(4000, 'validation.tooLong'),
+  accessToken: z.string().trim().min(1, 'validation.required').max(4000, 'validation.tooLong'),
 })
 
 type Values = z.infer<typeof schema>
@@ -57,7 +57,7 @@ export function ConnectAccountForm({ businessId, onConnected }: { businessId: st
         platformCode: v.platformCode,
         externalAccountId: v.externalAccountId,
         handle: v.handle.replace(/^@/, '') || null,
-        accessToken: v.accessToken || null,
+        accessToken: v.accessToken,
       })
       toast.success(t('social.connected'))
       reset({ ...v, handle: '', externalAccountId: '', accessToken: '' })
@@ -107,7 +107,7 @@ export function ConnectAccountForm({ businessId, onConnected }: { businessId: st
             <Input dir="ltr" {...register('externalAccountId')} />
           </Field>
         </div>
-        <Field label={t('social.accessToken')} optional hint={t('social.accessTokenHint')} error={formState.errors.accessToken?.message}>
+        <Field label={t('social.accessToken')} hint={t('social.accessTokenHint')} error={formState.errors.accessToken?.message}>
           <PasswordInput autoComplete="off" {...register('accessToken')} />
         </Field>
         <Button type="submit" disabled={formState.isSubmitting}>
