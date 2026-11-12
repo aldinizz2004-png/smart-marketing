@@ -8,7 +8,8 @@
     "content": "Content",
     "comments": "Comments",
     "settings": "Settings",
-    "main": "Main menu"
+    "main": "Main menu",
+    "profile": "My profile"
   },
   "actions": {
     "switchLanguage": "العربية",
@@ -31,7 +32,8 @@
       "awaitingReview": "Awaiting your review",
       "complaints": "Complaints to answer",
       "postsLeft": "Posts left today"
-    }
+    },
+    "greetingName": "Welcome, {{name}} 👋"
   },
   "pages": {
     "content": {
@@ -52,5 +54,72 @@
   "notFound": {
     "title": "Page not found",
     "hint": "The link may have changed or been typed incorrectly."
+  },
+  "common": {
+    "optional": "optional",
+    "loading": "Loading",
+    "close": "Close"
+  },
+  "roles": {
+    "Owner": "Owner",
+    "Admin": "Admin",
+    "Editor": "Editor",
+    "Reviewer": "Reviewer",
+    "Viewer": "Viewer"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "fullName": "Full name",
+    "tenantName": "Company or shop name",
+    "tenantNameHint": "You can add more shops under it later.",
+    "passwordHint": "At least 8 characters, with a letter and a digit.",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "logout": "Log out",
+    "pitch": "Better posts, happier customers, less time.",
+    "highlights": {
+      "ai": "AI writes your posts in your own dialect",
+      "comments": "Suggested replies to your customers' comments and messages",
+      "reports": "A clear weekly report on how your shop is doing"
+    },
+    "login": {
+      "title": "Log in",
+      "subtitle": "Welcome back! Log in to pick up where you left off.",
+      "submit": "Log in",
+      "wrong": "Wrong email or password",
+      "noAccount": "No account yet?",
+      "toRegister": "Create one"
+    },
+    "register": {
+      "title": "Create your account",
+      "subtitle": "One minute and you are marketing your shop.",
+      "submit": "Create account",
+      "haveAccount": "Already have an account?",
+      "toLogin": "Log in"
+    }
+  },
+  "validation": {
+    "required": "This field is required",
+    "email": "Enter a valid email",
+    "tooLong": "The text is too long",
+    "passwordLength": "At least 8 characters",
+    "passwordMix": "Use at least one letter and one digit"
+  },
+  "errors": {
+    "unexpected": "Something went wrong",
+    "network": "Could not reach the server. Check your connection and try again.",
+    "badRequest": "Please check what you entered",
+    "unauthorized": "Your session ended, please log in again",
+    "paymentRequired": "This needs an active subscription",
+    "forbidden": "You do not have permission to do this",
+    "notFound": "Not found",
+    "conflict": "This cannot be done right now",
+    "tooLarge": "The file is too large",
+    "unsupportedFile": "This file type is not supported",
+    "tooMany": "Too many requests in a short time",
+    "retryAfter": "Try again in {{seconds}} seconds",
+    "provider": "The external service did not respond, try again shortly",
+    "server": "Server error, try again shortly"
   }
 }
