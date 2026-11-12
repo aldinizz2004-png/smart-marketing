@@ -853,7 +853,8 @@
       "openMenu": "Open menu",
       "closeMenu": "Close menu",
       "features": "Features",
-      "stack": "Tech stack"
+      "stack": "Tech stack",
+      "demo": "Request a demo"
     },
     "hero": {
       "eyebrow": "An AI marketing assistant for small shops",
@@ -916,6 +917,30 @@
         "ai": "AI & integrations",
         "quality": "Quality & delivery"
       }
+    },
+    "demo": {
+      "eyebrow": "Try it with our team",
+      "title": "Request a demo for your shop",
+      "subtitle": "Fill in the request and we will show you how the platform works with your own products and shop.",
+      "points": {
+        "setup": "We set up your shop and brand with you, step by step",
+        "walkthrough": "We write your first posts together with the AI",
+        "questions": "We answer every question about plans and publishing"
+      },
+      "fullName": "Your name",
+      "shopName": "Shop name",
+      "email": "Email",
+      "phone": "Mobile number",
+      "category": "Type of shop",
+      "pickCategory": "Choose the type of shop",
+      "message": "Message",
+      "messageHint": "What would you most like to improve in your marketing?",
+      "consent": "I agree to be contacted about this request.",
+      "consentRequired": "Please agree so we can contact you",
+      "submit": "Send request",
+      "thanks": "Thank you, {{name}}! We got your request",
+      "thanksHint": "We will be in touch soon. If you'd like to start now, you can create your account.",
+      "another": "Send another request"
     }
   }
 }

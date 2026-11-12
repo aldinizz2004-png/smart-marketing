@@ -62,3 +62,28 @@ describe('landing tech stack', () => {
     expect(within(section).getByText('SQL Server 2025')).toBeInTheDocument()
   })
 })
+
+describe('landing demo request', () => {
+  it('checks the fields and confirms a valid request', async () => {
+    signOut()
+    renderAt(<AppRoutes />, '/welcome')
+
+    const form = await screen.findByRole('form', { name: 'اطلب عرض تجريبي لمحلك' })
+    await userEvent.click(within(form).getByRole('button', { name: 'أرسل الطلب' }))
+    expect(await within(form).findAllByText('هذا الحقل مطلوب')).toHaveLength(4)
+    expect(within(form).getByText('لازم توافق عشان نقدر نتواصل معك')).toBeInTheDocument()
+
+    await userEvent.type(within(form).getByLabelText('اسمك'), 'Sara')
+    await userEvent.type(within(form).getByLabelText('اسم المحل'), 'Qahwet Al-Hara')
+    await userEvent.type(within(form).getByLabelText('البريد الإلكتروني'), 'sara@')
+    await userEvent.selectOptions(within(form).getByLabelText('نوع المحل'), 'Cafe')
+    await userEvent.click(within(form).getByRole('checkbox'))
+    await userEvent.click(within(form).getByRole('button', { name: 'أرسل الطلب' }))
+    expect(await within(form).findByText('اكتب بريداً إلكترونياً صحيحاً')).toBeInTheDocument()
+
+    await userEvent.type(within(form).getByLabelText('البريد الإلكتروني'), 'cafe.ps')
+    await userEvent.click(within(form).getByRole('button', { name: 'أرسل الطلب' }))
+    expect(await screen.findByRole('status')).toHaveTextContent('شكراً Sara! وصلنا طلبك')
+    expect(JSON.parse(localStorage.getItem('smp.demoRequests') ?? '[]')).toHaveLength(1)
+  })
+})
