@@ -23,6 +23,18 @@ Arabic (RTL) is the default language, English is optional, and light and dark th
 
 To use another API address, copy `.env.example` to `.env.local` and change `VITE_API_URL`.
 
+## Landing page (Week 1 task)
+
+The public landing page lives at `/welcome` and is built from the same components, theme and translations as the app (`src/pages/landing/`).
+
+- A first-time visitor who opens `/` is sent to `/welcome`; someone who has signed in before goes to `/login`, and a signed-in user sees a link to the dashboard instead of the sign-in buttons.
+- Sections: a fixed header with a mobile menu, the hero with the main call to action, a three-column features grid, the tech stack badges, and a demo request form.
+- The demo form uses `react-hook-form` with `zod` validation. There is no endpoint for demo requests yet, so the request is kept in `localStorage` (`smp.demoRequests`) and a confirmation is shown.
+- "شوف بنية النظام" opens a modal with the system architecture. Dialogs move focus inside, keep Tab inside, close with Escape and give focus back to the button that opened them.
+- Semantic markup (`header`, `nav`, `main`, `section`, `form`, `footer`), one `h1`, labelled fields with error messages linked by `aria-describedby`, and no horizontal scroll from phone to desktop width.
+
+To see it while signed in, open http://localhost:5173/welcome directly.
+
 ## Scripts
 
 | Script | What it does |
