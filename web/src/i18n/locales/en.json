@@ -843,5 +843,34 @@
     "endOffer": "End \"{{name}}\"?",
     "endOfferHint": "An ended offer can't be restarted or edited.",
     "deleteOffer": "Delete \"{{name}}\"?"
+  },
+  "landing": {
+    "nav": {
+      "label": "Page sections",
+      "login": "Sign in",
+      "start": "Create account",
+      "dashboard": "Dashboard",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu"
+    },
+    "hero": {
+      "eyebrow": "An AI marketing assistant for small shops",
+      "title": "Your shop's social media runs itself while you run the shop",
+      "description": "Smart Marketing writes your posts in your own voice, publishes them at the best time, answers customer comments and messages, and tells you every week what worked.",
+      "cta": "Get started",
+      "note": "No marketing experience needed. Set up your shop in under 5 minutes.",
+      "previewShop": "Qahwet Al-Hara",
+      "previewInitial": "Q",
+      "previewWhen": "Scheduled post · Today 7:00 PM",
+      "previewImage": "A cup of coffee",
+      "previewCaption": "Tried our pistachio latte yet? ☕ Fresh every day for only ₪14. Drop by today 👇",
+      "previewBadge": "Written by AI",
+      "previewLabel": "An example post the platform wrote for a café"
+    },
+    "footer": {
+      "label": "Quick links",
+      "backToTop": "Back to top",
+      "rights": "© {{year}} Smart Marketing. All rights reserved."
+    }
   }
 }
