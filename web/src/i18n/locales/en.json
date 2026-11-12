@@ -941,6 +941,64 @@
       "thanks": "Thank you, {{name}}! We got your request",
       "thanksHint": "We will be in touch soon. If you'd like to start now, you can create your account.",
       "another": "Send another request"
+    },
+    "architecture": {
+      "open": "View architecture",
+      "title": "System architecture",
+      "subtitle": "How the parts of the platform talk to each other, from the browser to the outside services.",
+      "layers": {
+        "client": "Client",
+        "api": "Server: ASP.NET Core Web API",
+        "data": "Storage",
+        "external": "External services"
+      },
+      "links": {
+        "api": "HTTPS JSON requests with a JWT",
+        "data": "EF Core",
+        "external": "Background workers and services"
+      },
+      "nodes": {
+        "spa": {
+          "title": "React app",
+          "body": "A single-page app in Arabic and English that works on phones and desktops."
+        },
+        "auth": {
+          "title": "Sign-in and roles",
+          "body": "Short-lived JWTs, refresh through an httpOnly cookie, and team roles."
+        },
+        "services": {
+          "title": "Services and rules",
+          "body": "Shops, content, campaigns and reviews, with every shop's data kept apart."
+        },
+        "workers": {
+          "title": "Background workers",
+          "body": "Scheduled publishing, comment sync, WhatsApp, competitors and reports."
+        },
+        "sql": {
+          "title": "SQL Server",
+          "body": "All of the data, with migrations and shared status tables."
+        },
+        "files": {
+          "title": "File storage",
+          "body": "Photos, videos and documents, checked for real type and size."
+        },
+        "llm": {
+          "title": "AI model",
+          "body": "Writes posts, plans, replies and reports."
+        },
+        "social": {
+          "title": "Social publishing",
+          "body": "Instagram and Facebook, with engagement and comments pulled back."
+        },
+        "whatsapp": {
+          "title": "WhatsApp Cloud API",
+          "body": "Receives customer messages and sends the replies."
+        },
+        "competitors": {
+          "title": "Meta Graph API",
+          "body": "Reads the public posts of competitor accounts."
+        }
+      }
     }
   }
 }

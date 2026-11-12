@@ -87,3 +87,20 @@ describe('landing demo request', () => {
     expect(JSON.parse(localStorage.getItem('smp.demoRequests') ?? '[]')).toHaveLength(1)
   })
 })
+
+describe('landing architecture dialog', () => {
+  it('opens from the hero and closes with Escape', async () => {
+    signOut()
+    renderAt(<AppRoutes />, '/welcome')
+
+    const heroButton = (await screen.findAllByRole('button', { name: 'شوف بنية النظام' }))[0]!
+    await userEvent.click(heroButton)
+    const dialog = screen.getByRole('dialog', { name: 'بنية النظام' })
+    expect(within(dialog).getByText('SQL Server')).toBeInTheDocument()
+    expect(within(dialog).getByText('WhatsApp Cloud API')).toBeInTheDocument()
+
+    await userEvent.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(heroButton).toHaveFocus()
+  })
+})
