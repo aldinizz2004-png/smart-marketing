@@ -14,6 +14,7 @@ import { ContentListPage } from '@/pages/content/content-list-page'
 import { CreatePostPage } from '@/pages/content/create-post-page'
 import { HomePage } from '@/pages/home-page'
 import { InboxPage } from '@/pages/inbox/inbox-page'
+import { LandingPage } from '@/pages/landing/landing-page'
 import { NewBusinessPage } from '@/pages/new-business-page'
 import { NotFoundPage } from '@/pages/not-found-page'
 import { OnboardingPage } from '@/pages/onboarding/onboarding-page'
@@ -22,6 +23,7 @@ import { AppShell } from './layout/app-shell'
 export function AppRoutes() {
   return (
     <Routes>
+      <Route path="welcome" element={<LandingPage />} />
       <Route path="login" element={<PublicOnly><LoginPage /></PublicOnly>} />
       <Route path="register" element={<PublicOnly><RegisterPage /></PublicOnly>} />
       <Route path="onboarding" element={<RequireAuth><OnboardingPage /></RequireAuth>} />

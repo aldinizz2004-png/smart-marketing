@@ -843,5 +843,162 @@
     "endOffer": "End \"{{name}}\"?",
     "endOfferHint": "An ended offer can't be restarted or edited.",
     "deleteOffer": "Delete \"{{name}}\"?"
+  },
+  "landing": {
+    "nav": {
+      "label": "Page sections",
+      "login": "Sign in",
+      "start": "Create account",
+      "dashboard": "Dashboard",
+      "openMenu": "Open menu",
+      "closeMenu": "Close menu",
+      "features": "Features",
+      "stack": "Tech stack",
+      "demo": "Request a demo"
+    },
+    "hero": {
+      "eyebrow": "An AI marketing assistant for small shops",
+      "title": "Your shop's social media runs itself while you run the shop",
+      "description": "Smart Marketing writes your posts in your own voice, publishes them at the best time, answers customer comments and messages, and tells you every week what worked.",
+      "cta": "Get started",
+      "note": "No marketing experience needed. Set up your shop in under 5 minutes.",
+      "previewShop": "Qahwet Al-Hara",
+      "previewInitial": "Q",
+      "previewWhen": "Scheduled post · Today 7:00 PM",
+      "previewImage": "A cup of coffee",
+      "previewCaption": "Tried our pistachio latte yet? ☕ Fresh every day for only ₪14. Drop by today 👇",
+      "previewBadge": "Written by AI",
+      "previewLabel": "An example post the platform wrote for a café"
+    },
+    "footer": {
+      "label": "Quick links",
+      "backToTop": "Back to top",
+      "rights": "© {{year}} Smart Marketing. All rights reserved."
+    },
+    "features": {
+      "eyebrow": "Everything in one place",
+      "title": "From the first post idea to the weekly report",
+      "subtitle": "Instead of jumping between five apps, all of your marketing happens in one place, in your shop's language.",
+      "items": {
+        "writing": {
+          "title": "Posts that write themselves",
+          "body": "The AI writes in your dialect and your shop's tone, from your real products and offers, and avoids the words you don't like."
+        },
+        "publishing": {
+          "title": "Scheduled at the best time",
+          "body": "Approve a post and it goes out on Instagram and Facebook when your audience is most active."
+        },
+        "inbox": {
+          "title": "Comments and WhatsApp together",
+          "body": "Comments and messages are sorted (question, complaint, order) with a ready reply you can edit and send in one click."
+        },
+        "campaigns": {
+          "title": "Campaigns with a clear plan",
+          "body": "Set the goal and get a full plan: how many posts, which formats and on which days."
+        },
+        "competitors": {
+          "title": "An eye on competitors",
+          "body": "Follow competitor accounts, see what works for them and turn it into ideas that fit your shop."
+        },
+        "reports": {
+          "title": "A weekly report in plain words",
+          "body": "What worked, what didn't and what to do next, without complicated numbers."
+        }
+      }
+    },
+    "stack": {
+      "eyebrow": "How it is built",
+      "title": "A modern, reliable stack",
+      "subtitle": "A fast interface in Arabic and English, a secure API that keeps every shop's data apart, and automatic checks on every change.",
+      "groups": {
+        "backend": "Backend",
+        "data": "Database",
+        "frontend": "Frontend",
+        "ai": "AI & integrations",
+        "quality": "Quality & delivery"
+      }
+    },
+    "demo": {
+      "eyebrow": "Try it with our team",
+      "title": "Request a demo for your shop",
+      "subtitle": "Fill in the request and we will show you how the platform works with your own products and shop.",
+      "points": {
+        "setup": "We set up your shop and brand with you, step by step",
+        "walkthrough": "We write your first posts together with the AI",
+        "questions": "We answer every question about plans and publishing"
+      },
+      "fullName": "Your name",
+      "shopName": "Shop name",
+      "email": "Email",
+      "phone": "Mobile number",
+      "category": "Type of shop",
+      "pickCategory": "Choose the type of shop",
+      "message": "Message",
+      "messageHint": "What would you most like to improve in your marketing?",
+      "consent": "I agree to be contacted about this request.",
+      "consentRequired": "Please agree so we can contact you",
+      "submit": "Send request",
+      "thanks": "Thank you, {{name}}! We got your request",
+      "thanksHint": "We will be in touch soon. If you'd like to start now, you can create your account.",
+      "another": "Send another request"
+    },
+    "architecture": {
+      "open": "View architecture",
+      "title": "System architecture",
+      "subtitle": "How the parts of the platform talk to each other, from the browser to the outside services.",
+      "layers": {
+        "client": "Client",
+        "api": "Server: ASP.NET Core Web API",
+        "data": "Storage",
+        "external": "External services"
+      },
+      "links": {
+        "api": "HTTPS JSON requests with a JWT",
+        "data": "EF Core",
+        "external": "Background workers and services"
+      },
+      "nodes": {
+        "spa": {
+          "title": "React app",
+          "body": "A single-page app in Arabic and English that works on phones and desktops."
+        },
+        "auth": {
+          "title": "Sign-in and roles",
+          "body": "Short-lived JWTs, refresh through an httpOnly cookie, and team roles."
+        },
+        "services": {
+          "title": "Services and rules",
+          "body": "Shops, content, campaigns and reviews, with every shop's data kept apart."
+        },
+        "workers": {
+          "title": "Background workers",
+          "body": "Scheduled publishing, comment sync, WhatsApp, competitors and reports."
+        },
+        "sql": {
+          "title": "SQL Server",
+          "body": "All of the data, with migrations and shared status tables."
+        },
+        "files": {
+          "title": "File storage",
+          "body": "Photos, videos and documents, checked for real type and size."
+        },
+        "llm": {
+          "title": "AI model",
+          "body": "Writes posts, plans, replies and reports."
+        },
+        "social": {
+          "title": "Social publishing",
+          "body": "Instagram and Facebook, with engagement and comments pulled back."
+        },
+        "whatsapp": {
+          "title": "WhatsApp Cloud API",
+          "body": "Receives customer messages and sends the replies."
+        },
+        "competitors": {
+          "title": "Meta Graph API",
+          "body": "Reads the public posts of competitor accounts."
+        }
+      }
+    }
   }
 }

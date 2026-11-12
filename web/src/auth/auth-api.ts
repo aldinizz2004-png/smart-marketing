@@ -44,7 +44,7 @@ function rememberSignedIn(value: boolean) {
   }
 }
 
-function maybeSignedIn() {
+export function maybeSignedIn() {
   try {
     return localStorage.getItem(signedInFlag) !== null
   } catch {
