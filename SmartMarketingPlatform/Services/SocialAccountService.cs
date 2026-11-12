@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SmartMarketingPlatform.Common.Businesses;
 using SmartMarketingPlatform.Common.Errors;
+using SmartMarketingPlatform.Common.Publishing;
 using SmartMarketingPlatform.Common.Secrets;
 using SmartMarketingPlatform.Common.Statuses;
 using SmartMarketingPlatform.Data;
@@ -15,6 +16,7 @@ public sealed class SocialAccountService(
     MarketingDbContext db,
     IBusinessAccess access,
     ISecretStore secrets,
+    ISocialPublisher publisher,
     StatusCatalog statuses) : ISocialAccountService
 {
     public async Task<IReadOnlyList<SocialAccountResponse>> GetAllAsync(Guid businessId, CancellationToken cancellationToken)
@@ -54,7 +56,11 @@ public sealed class SocialAccountService(
 
         var account = existing ?? new SocialAccount { BusinessId = businessId, PlatformCode = platformCode, ExternalAccountId = externalId };
         account.Handle = request.Handle?.Trim().TrimStart('@');
-        await ReplaceCredentialAsync(account, request.AccessToken!, cancellationToken);
+        // Postproxy keeps the platform tokens itself; direct publishers need the account's own token.
+        if (!string.IsNullOrWhiteSpace(request.AccessToken))
+            await ReplaceCredentialAsync(account, request.AccessToken, cancellationToken);
+        else if (publisher.RequiresAccessToken && account.CredentialRef is null)
+            throw new BadRequestException("This publishing provider needs the account's access token (AccessToken).");
         account.StatusId = StatusIds.SocialAccount.Connected;
 
         if (existing is null) db.SocialAccounts.Add(account);
