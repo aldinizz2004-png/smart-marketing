@@ -40,3 +40,19 @@ export function workspaceRoutes() {
     { path: '/api/platforms', body: platforms },
   ]
 }
+
+// Empty answers for everything the home page asks for.
+export function dashboardRoutes() {
+  const b = '/api/businesses/b1'
+  return [
+    { path: `${b}/content-items`, body: paged([]) },
+    { path: `${b}/comments`, body: paged([]) },
+    { path: `${b}/conversations`, body: paged([]) },
+    { path: `${b}/publication-jobs`, body: paged([]) },
+    { path: `${b}/performance`, body: { posts: 0, totals: {}, byPlatform: [], byFormat: [], byHook: [], topPosts: [] } },
+    { path: `${b}/reports`, body: paged([]) },
+    { path: `${b}/brand-profile`, status: 404, body: { title: 'Not Found' } },
+    { path: `${b}/social-accounts`, body: [] },
+    { path: `${b}/products`, body: paged([]) },
+  ]
+}

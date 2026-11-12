@@ -1,14 +1,14 @@
 import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
-import { workspaceRoutes } from '@/test/fixtures'
+import { dashboardRoutes, workspaceRoutes } from '@/test/fixtures'
 import { fakeApi, renderAt, signIn, signOut } from '@/test/render'
 import { AppRoutes } from './routes'
 
 describe('app routes', () => {
   it('shows the home page with the Arabic navigation to a signed-in user', async () => {
     signIn()
-    fakeApi(workspaceRoutes())
+    fakeApi([...workspaceRoutes(), ...dashboardRoutes()])
     renderAt(<AppRoutes />)
 
     expect(await screen.findByRole('heading', { level: 1, name: /أهلاً يا Sara/ })).toBeInTheDocument()
@@ -18,7 +18,7 @@ describe('app routes', () => {
 
   it('reports that the API is reachable', async () => {
     signIn()
-    fakeApi(workspaceRoutes())
+    fakeApi([...workspaceRoutes(), ...dashboardRoutes()])
     renderAt(<AppRoutes />)
 
     expect(await screen.findByText('متصل بالخادم')).toBeInTheDocument()
@@ -26,7 +26,7 @@ describe('app routes', () => {
 
   it('switches the whole page to English', async () => {
     signIn()
-    fakeApi(workspaceRoutes())
+    fakeApi([...workspaceRoutes(), ...dashboardRoutes()])
     renderAt(<AppRoutes />)
 
     await userEvent.click(await screen.findByRole('button', { name: 'التبديل إلى الإنجليزية' }))
@@ -44,7 +44,7 @@ describe('app routes', () => {
 
   it('shows a friendly page for unknown links', async () => {
     signIn()
-    fakeApi(workspaceRoutes())
+    fakeApi([...workspaceRoutes(), ...dashboardRoutes()])
     renderAt(<AppRoutes />, '/no-such-page')
 
     expect(await screen.findByRole('heading', { name: 'الصفحة غير موجودة' })).toBeInTheDocument()
