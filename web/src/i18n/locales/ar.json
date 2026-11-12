@@ -12,7 +12,8 @@
     "profile": "ملفي الشخصي",
     "campaigns": "الحملات",
     "more": "المزيد",
-    "inbox": "واتساب"
+    "inbox": "واتساب",
+    "catalog": "المنتجات والعروض"
   },
   "actions": {
     "switchLanguage": "English",
@@ -147,7 +148,8 @@
     "phone": "رقم الهاتف أرقام فقط، ويمكن أن يبدأ بـ +",
     "paymentReference": "اكتب رقم المرجع (3 أحرف على الأقل)",
     "number": "اكتب رقماً صحيحاً",
-    "endBeforeStart": "تاريخ النهاية قبل البداية"
+    "endBeforeStart": "تاريخ النهاية قبل البداية",
+    "percent": "النسبة بين 0 و 100"
   },
   "errors": {
     "unexpected": "حدث خطأ غير متوقع",
@@ -369,7 +371,62 @@
   "media": {
     "upload": "رفع صور",
     "empty": "لا توجد صور بعد. ارفع صور منتجاتك لتظهر هنا.",
-    "tooLarge": "الصورة أكبر من 10 ميغابايت"
+    "tooLarge": "الصورة أكبر من 10 ميغابايت",
+    "uploadFiles": "رفع ملفات",
+    "uploadTitle": "رفع صور وملفات",
+    "uploadCount": "ارفع ({{count}})",
+    "uploaded": "انرفع {{count}} ملف",
+    "kind": "النوع",
+    "kinds": {
+      "ProductPhoto": "صورة منتج",
+      "BrandImage": "صورة للمحل",
+      "Logo": "شعار",
+      "GeneratedImage": "صورة مولّدة",
+      "Video": "فيديو",
+      "Document": "مستند"
+    },
+    "kindHints": {
+      "ProductPhoto": "JPG أو PNG أو WebP، لحد {{max}}",
+      "BrandImage": "صور المحل والأجواء. JPG أو PNG أو WebP، لحد {{max}}",
+      "Logo": "JPG أو PNG أو WebP، لحد {{max}}",
+      "GeneratedImage": "JPG أو PNG أو WebP، لحد {{max}}",
+      "Video": "MP4 لحد {{max}}",
+      "Document": "PDF أو نص، لحد {{max}}"
+    },
+    "product": "المنتج",
+    "productHint": "اربط الصورة بمنتج عشان تطلع معه بالمنشورات.",
+    "noProduct": "بدون منتج",
+    "pickFiles": "اختار ملفات من جهازك",
+    "filesPicked": "اخترت {{count}} ملف",
+    "tooBig": "الملف \"{{name}}\" أكبر من {{max}}",
+    "wrongType": "نوع الملف \"{{name}}\" مش مناسب لهالنوع",
+    "emptyLibrary": "مكتبتك فاضية",
+    "emptyKind": "ما في ملفات من هالنوع",
+    "emptyHint": "ارفع صور منتجاتك ومحلك عشان تستعملها بالمنشورات.",
+    "image": "صورة",
+    "download": "تنزيل",
+    "describe": "خلّي الذكاء الاصطناعي يفحصها",
+    "describeAgain": "افحصها مرة ثانية",
+    "described": "تم فحص الصورة",
+    "notDescribed": "الصورة ما انفحصت لسا",
+    "notDescribedHint": "الفحص بيوصف الصورة وبيقلك إذا جودتها مناسبة للإعلان.",
+    "whatAiSees": "شو بشوف الذكاء الاصطناعي",
+    "showsProduct": "المنتج واضح بالصورة",
+    "noProductVisible": "المنتج مش واضح",
+    "goodQuality": "جودة الصورة ممتازة",
+    "issues": "ملاحظات على الجودة",
+    "advice": "نصيحة",
+    "issueNames": {
+      "LowResolution": "دقة منخفضة",
+      "Blurry": "مغبّشة",
+      "Dark": "معتمة",
+      "Overexposed": "فيها ضو زيادة",
+      "ClutteredBackground": "الخلفية مزحومة",
+      "ProductNotVisible": "المنتج مش ظاهر",
+      "TextUnreadable": "الكتابة مش مقروءة"
+    },
+    "confirmDelete": "متأكد بدك تحذفها؟",
+    "deleted": "تم حذف الملف"
   },
   "enums": {
     "contentType": {
@@ -710,5 +767,81 @@
       "Greeting": "تحية",
       "Other": "غير ذلك"
     }
+  },
+  "catalog": {
+    "title": "المنتجات والعروض",
+    "subtitle": "اللي ببيعه محلك، وعروضك، وصورك. الذكاء الاصطناعي بيكتب منها.",
+    "tabs": {
+      "products": "المنتجات",
+      "offers": "العروض",
+      "media": "الصور والملفات"
+    },
+    "searchProducts": "دوّر على منتج",
+    "newProduct": "منتج جديد",
+    "editProduct": "تعديل المنتج",
+    "productAdded": "انضاف المنتج",
+    "productName": "اسم المنتج",
+    "productNamePlaceholder": "مثلاً: لاتيه الفستق",
+    "price": "السعر",
+    "currency": "العملة",
+    "sku": "رمز المنتج (SKU)",
+    "skuHint": "إذا عندك رمز داخلي للمنتج",
+    "description": "الوصف",
+    "descriptionHint": "شو بميّزه؟ الذكاء الاصطناعي بيستعمل هالكلام بالمنشورات.",
+    "activeLabel": "متوفر للبيع",
+    "active": "متوفر",
+    "inactive": "مخفي",
+    "hide": "إخفاء",
+    "show": "إظهار",
+    "hidden": "صار المنتج مخفي",
+    "shown": "رجع المنتج متوفر",
+    "noProducts": "ما في منتجات لسا",
+    "noProductsHint": "ضيف منتجاتك وأسعارها عشان الذكاء الاصطناعي يكتب عنها.",
+    "noProductsFound": "ما لقينا منتج بهالاسم",
+    "deleteProduct": "حذف \"{{name}}\"؟",
+    "deleteProductHint": "إذا المنتج مستعمل بحملة أو صورة، ما بنقدر نحذفه. أخفيه بداله.",
+    "deleted": "تم الحذف",
+    "newOffer": "عرض جديد",
+    "editOffer": "تعديل العرض",
+    "offerAdded": "انضاف العرض كمسودة",
+    "offerHint": "العرض بيبدأ كمسودة، وبتفعّله لما تكون جاهز.",
+    "offerTitle": "عنوان العرض",
+    "offerTitlePlaceholder": "مثلاً: خصم الويكند على الحلو",
+    "offerKind": "نوع العرض",
+    "kinds": {
+      "price": "سعر خاص",
+      "discount": "نسبة خصم"
+    },
+    "offerPrice": "سعر العرض",
+    "discountPercent": "نسبة الخصم %",
+    "startsAt": "بيبدأ",
+    "endsAt": "بيخلص",
+    "percentOff": "خصم {{value}}%",
+    "dateRange": "من {{from}} إلى {{to}}",
+    "runningNow": "شغّال هلأ",
+    "noOffers": "ما في عروض لسا",
+    "noOffersHint": "العروض بتساعد الحملات تبيع أكثر.",
+    "noOffersFiltered": "ما في عروض بهالحالة",
+    "offerStatuses": {
+      "Draft": "مسودة",
+      "Active": "فعّال",
+      "Paused": "موقوف",
+      "Ended": "منتهي"
+    },
+    "moves": {
+      "Active": "تفعيل",
+      "Paused": "إيقاف مؤقت",
+      "Ended": "إنهاء",
+      "Draft": "مسودة"
+    },
+    "moved": {
+      "Active": "تم تفعيل العرض",
+      "Paused": "تم إيقاف العرض",
+      "Ended": "انتهى العرض",
+      "Draft": "رجع العرض مسودة"
+    },
+    "endOffer": "إنهاء \"{{name}}\"؟",
+    "endOfferHint": "العرض المنتهي ما برجع ولا بتقدر تعدّله.",
+    "deleteOffer": "حذف \"{{name}}\"؟"
   }
 }

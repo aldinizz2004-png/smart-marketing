@@ -6,6 +6,7 @@ import { LoginPage } from '@/pages/auth/login-page'
 import { RegisterPage } from '@/pages/auth/register-page'
 import { CampaignDetailPage } from '@/pages/campaigns/campaign-detail-page'
 import { CampaignsPage } from '@/pages/campaigns/campaigns-page'
+import { CatalogPage } from '@/pages/catalog/catalog-page'
 import { CommentsPage } from '@/pages/comments/comments-page'
 import { ComingSoonPage } from '@/pages/coming-soon-page'
 import { ContentDetailPage } from '@/pages/content/content-detail-page'
@@ -32,6 +33,7 @@ export function AppRoutes() {
         <Route path="content/:id" element={<ContentDetailPage />} />
         <Route path="campaigns" element={<CampaignsPage />} />
         <Route path="campaigns/:id" element={<CampaignDetailPage />} />
+        <Route path="catalog" element={<CatalogPage />} />
         <Route path="comments" element={<CommentsPage />} />
         <Route path="inbox" element={<InboxPage />} />
         <Route path="inbox/:id" element={<InboxPage />} />

@@ -12,7 +12,8 @@
     "profile": "My profile",
     "campaigns": "Campaigns",
     "more": "More",
-    "inbox": "WhatsApp"
+    "inbox": "WhatsApp",
+    "catalog": "Products & offers"
   },
   "actions": {
     "switchLanguage": "العربية",
@@ -147,7 +148,8 @@
     "phone": "Digits only, may start with +",
     "paymentReference": "Enter the reference (at least 3 characters)",
     "number": "Enter a valid number",
-    "endBeforeStart": "The end is before the start"
+    "endBeforeStart": "The end is before the start",
+    "percent": "Enter a percentage between 0 and 100"
   },
   "errors": {
     "unexpected": "Something went wrong",
@@ -369,7 +371,62 @@
   "media": {
     "upload": "Upload photos",
     "empty": "No photos yet. Upload your product photos to see them here.",
-    "tooLarge": "The image is larger than 10 MB"
+    "tooLarge": "The image is larger than 10 MB",
+    "uploadFiles": "Upload files",
+    "uploadTitle": "Upload photos and files",
+    "uploadCount": "Upload ({{count}})",
+    "uploaded": "Uploaded {{count}} file(s)",
+    "kind": "Type",
+    "kinds": {
+      "ProductPhoto": "Product photo",
+      "BrandImage": "Shop photo",
+      "Logo": "Logo",
+      "GeneratedImage": "Generated image",
+      "Video": "Video",
+      "Document": "Document"
+    },
+    "kindHints": {
+      "ProductPhoto": "JPG, PNG or WebP, up to {{max}}",
+      "BrandImage": "Your shop and its mood. JPG, PNG or WebP, up to {{max}}",
+      "Logo": "JPG, PNG or WebP, up to {{max}}",
+      "GeneratedImage": "JPG, PNG or WebP, up to {{max}}",
+      "Video": "MP4 up to {{max}}",
+      "Document": "PDF or text, up to {{max}}"
+    },
+    "product": "Product",
+    "productHint": "Link the photo to a product so it's used with it in posts.",
+    "noProduct": "No product",
+    "pickFiles": "Choose files from your device",
+    "filesPicked": "{{count}} file(s) chosen",
+    "tooBig": "\"{{name}}\" is larger than {{max}}",
+    "wrongType": "\"{{name}}\" is not a supported file for this type",
+    "emptyLibrary": "Your library is empty",
+    "emptyKind": "No files of this type",
+    "emptyHint": "Upload photos of your products and shop to use them in posts.",
+    "image": "Image",
+    "download": "Download",
+    "describe": "Let the AI check it",
+    "describeAgain": "Check again",
+    "described": "Photo checked",
+    "notDescribed": "Not checked yet",
+    "notDescribedHint": "The check describes the photo and tells you if it's good enough for an ad.",
+    "whatAiSees": "What the AI sees",
+    "showsProduct": "Product is clearly visible",
+    "noProductVisible": "Product isn't clear",
+    "goodQuality": "Great photo quality",
+    "issues": "Quality notes",
+    "advice": "Tip",
+    "issueNames": {
+      "LowResolution": "Low resolution",
+      "Blurry": "Blurry",
+      "Dark": "Too dark",
+      "Overexposed": "Overexposed",
+      "ClutteredBackground": "Busy background",
+      "ProductNotVisible": "Product not visible",
+      "TextUnreadable": "Text unreadable"
+    },
+    "confirmDelete": "Delete this file?",
+    "deleted": "File deleted"
   },
   "enums": {
     "contentType": {
@@ -710,5 +767,81 @@
       "Greeting": "Greeting",
       "Other": "Other"
     }
+  },
+  "catalog": {
+    "title": "Products & offers",
+    "subtitle": "What your shop sells, your offers and your photos. The AI writes from these.",
+    "tabs": {
+      "products": "Products",
+      "offers": "Offers",
+      "media": "Photos & files"
+    },
+    "searchProducts": "Search products",
+    "newProduct": "New product",
+    "editProduct": "Edit product",
+    "productAdded": "Product added",
+    "productName": "Product name",
+    "productNamePlaceholder": "e.g. Pistachio latte",
+    "price": "Price",
+    "currency": "Currency",
+    "sku": "SKU",
+    "skuHint": "If you have an internal code for it",
+    "description": "Description",
+    "descriptionHint": "What makes it special? The AI uses this in posts.",
+    "activeLabel": "Available for sale",
+    "active": "Available",
+    "inactive": "Hidden",
+    "hide": "Hide",
+    "show": "Show",
+    "hidden": "Product hidden",
+    "shown": "Product available again",
+    "noProducts": "No products yet",
+    "noProductsHint": "Add your products and prices so the AI can write about them.",
+    "noProductsFound": "No product matches that name",
+    "deleteProduct": "Delete \"{{name}}\"?",
+    "deleteProductHint": "A product used by a campaign or a photo can't be deleted. Hide it instead.",
+    "deleted": "Deleted",
+    "newOffer": "New offer",
+    "editOffer": "Edit offer",
+    "offerAdded": "Offer saved as a draft",
+    "offerHint": "An offer starts as a draft; activate it when you're ready.",
+    "offerTitle": "Offer title",
+    "offerTitlePlaceholder": "e.g. Weekend dessert deal",
+    "offerKind": "Offer type",
+    "kinds": {
+      "price": "Special price",
+      "discount": "Percent off"
+    },
+    "offerPrice": "Offer price",
+    "discountPercent": "Discount %",
+    "startsAt": "Starts",
+    "endsAt": "Ends",
+    "percentOff": "{{value}}% off",
+    "dateRange": "{{from}} – {{to}}",
+    "runningNow": "Running now",
+    "noOffers": "No offers yet",
+    "noOffersHint": "Offers help your campaigns sell more.",
+    "noOffersFiltered": "No offers with this status",
+    "offerStatuses": {
+      "Draft": "Draft",
+      "Active": "Active",
+      "Paused": "Paused",
+      "Ended": "Ended"
+    },
+    "moves": {
+      "Active": "Activate",
+      "Paused": "Pause",
+      "Ended": "End",
+      "Draft": "Draft"
+    },
+    "moved": {
+      "Active": "Offer activated",
+      "Paused": "Offer paused",
+      "Ended": "Offer ended",
+      "Draft": "Offer back to draft"
+    },
+    "endOffer": "End \"{{name}}\"?",
+    "endOfferHint": "An ended offer can't be restarted or edited.",
+    "deleteOffer": "Delete \"{{name}}\"?"
   }
 }

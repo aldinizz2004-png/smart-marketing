@@ -189,7 +189,7 @@ function SetupChecklist() {
   const steps = [
     { done: setup.data.brand, label: t('home.setup.brand'), to: '/settings/brand' },
     { done: setup.data.account, label: t('home.setup.account'), to: '/settings/accounts' },
-    { done: setup.data.product, label: t('home.setup.product'), to: '/products' },
+    { done: setup.data.product, label: t('home.setup.product'), to: '/catalog' },
   ]
   return (
     <Card className="border-sun-400/50 bg-sun-300/10 p-6">
