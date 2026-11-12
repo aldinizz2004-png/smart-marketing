@@ -98,6 +98,11 @@ describe('landing architecture dialog', () => {
     const dialog = screen.getByRole('dialog', { name: 'بنية النظام' })
     expect(within(dialog).getByText('SQL Server')).toBeInTheDocument()
     expect(within(dialog).getByText('WhatsApp Cloud API')).toBeInTheDocument()
+    expect(dialog).toHaveFocus()
+    await userEvent.tab()
+    expect(within(dialog).getByRole('button', { name: 'إغلاق' })).toHaveFocus()
+    await userEvent.tab()
+    expect(within(dialog).getByRole('button', { name: 'إغلاق' })).toHaveFocus()
 
     await userEvent.keyboard('{Escape}')
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()

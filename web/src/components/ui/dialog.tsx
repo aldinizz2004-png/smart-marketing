@@ -14,6 +14,8 @@ type DialogProps = {
   size?: 'md' | 'lg'
 }
 
+const focusable = 'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
 // Modal with focus moved inside, Escape and backdrop to close, and the page behind it locked.
 export function Dialog({ open, onClose, title, description, children, footer, size = 'md' }: DialogProps) {
   const { t } = useTranslation()
@@ -23,10 +25,28 @@ export function Dialog({ open, onClose, title, description, children, footer, si
   useEffect(() => {
     if (!open) return
     const previous = document.activeElement as HTMLElement | null
-    const onKey = (event: KeyboardEvent) => event.key === 'Escape' && onClose()
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') return onClose()
+      if (event.key !== 'Tab' || !panel.current) return
+      // Keep keyboard focus inside the dialog while it is open.
+      const items = [...panel.current.querySelectorAll<HTMLElement>(focusable)]
+      const first = items[0]
+      const last = items[items.length - 1]
+      if (!first || !last) return event.preventDefault()
+      const active = document.activeElement
+      if (event.shiftKey && (active === first || active === panel.current)) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault()
+        first.focus()
+      }
+    }
     document.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
-    panel.current?.querySelector<HTMLElement>('input, textarea, select, button:not([data-close])')?.focus()
+    const field = panel.current?.querySelector<HTMLElement>('input, textarea, select, button:not([data-close])')
+    if (field) field.focus()
+    else panel.current?.focus()
     return () => {
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = ''
@@ -42,8 +62,9 @@ export function Dialog({ open, onClose, title, description, children, footer, si
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
+        tabIndex={-1}
         className={cn(
-          'flex max-h-[92dvh] w-full flex-col rounded-t-3xl border border-line bg-surface shadow-2xl sm:rounded-3xl',
+          'flex max-h-[92dvh] w-full flex-col outline-none rounded-t-3xl border border-line bg-surface shadow-2xl sm:rounded-3xl',
           size === 'lg' ? 'sm:max-w-2xl' : 'sm:max-w-lg',
         )}
       >
