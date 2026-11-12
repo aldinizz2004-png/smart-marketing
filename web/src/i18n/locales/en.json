@@ -852,7 +852,8 @@
       "dashboard": "Dashboard",
       "openMenu": "Open menu",
       "closeMenu": "Close menu",
-      "features": "Features"
+      "features": "Features",
+      "stack": "Tech stack"
     },
     "hero": {
       "eyebrow": "An AI marketing assistant for small shops",
@@ -902,6 +903,18 @@
           "title": "A weekly report in plain words",
           "body": "What worked, what didn't and what to do next, without complicated numbers."
         }
+      }
+    },
+    "stack": {
+      "eyebrow": "How it is built",
+      "title": "A modern, reliable stack",
+      "subtitle": "A fast interface in Arabic and English, a secure API that keeps every shop's data apart, and automatic checks on every change.",
+      "groups": {
+        "backend": "Backend",
+        "data": "Database",
+        "frontend": "Frontend",
+        "ai": "AI & integrations",
+        "quality": "Quality & delivery"
       }
     }
   }

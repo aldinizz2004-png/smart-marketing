@@ -50,3 +50,15 @@ describe('landing features', () => {
     expect(screen.getAllByRole('link', { name: 'المميزات' })[0]).toHaveAttribute('href', '#features')
   })
 })
+
+describe('landing tech stack', () => {
+  it('shows the technologies as badges', async () => {
+    signOut()
+    renderAt(<AppRoutes />, '/welcome')
+
+    const section = await screen.findByRole('region', { name: 'تقنيات حديثة وموثوقة' })
+    expect(within(section).getByText('ASP.NET Core 10')).toBeInTheDocument()
+    expect(within(section).getByText('React 19')).toBeInTheDocument()
+    expect(within(section).getByText('SQL Server 2025')).toBeInTheDocument()
+  })
+})
