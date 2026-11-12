@@ -851,7 +851,8 @@
       "start": "Create account",
       "dashboard": "Dashboard",
       "openMenu": "Open menu",
-      "closeMenu": "Close menu"
+      "closeMenu": "Close menu",
+      "features": "Features"
     },
     "hero": {
       "eyebrow": "An AI marketing assistant for small shops",
@@ -871,6 +872,37 @@
       "label": "Quick links",
       "backToTop": "Back to top",
       "rights": "© {{year}} Smart Marketing. All rights reserved."
+    },
+    "features": {
+      "eyebrow": "Everything in one place",
+      "title": "From the first post idea to the weekly report",
+      "subtitle": "Instead of jumping between five apps, all of your marketing happens in one place, in your shop's language.",
+      "items": {
+        "writing": {
+          "title": "Posts that write themselves",
+          "body": "The AI writes in your dialect and your shop's tone, from your real products and offers, and avoids the words you don't like."
+        },
+        "publishing": {
+          "title": "Scheduled at the best time",
+          "body": "Approve a post and it goes out on Instagram and Facebook when your audience is most active."
+        },
+        "inbox": {
+          "title": "Comments and WhatsApp together",
+          "body": "Comments and messages are sorted (question, complaint, order) with a ready reply you can edit and send in one click."
+        },
+        "campaigns": {
+          "title": "Campaigns with a clear plan",
+          "body": "Set the goal and get a full plan: how many posts, which formats and on which days."
+        },
+        "competitors": {
+          "title": "An eye on competitors",
+          "body": "Follow competitor accounts, see what works for them and turn it into ideas that fit your shop."
+        },
+        "reports": {
+          "title": "A weekly report in plain words",
+          "body": "What worked, what didn't and what to do next, without complicated numbers."
+        }
+      }
     }
   }
 }

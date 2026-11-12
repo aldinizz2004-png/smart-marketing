@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react'
+import { screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { AppRoutes } from '@/app/routes'
@@ -37,5 +37,16 @@ describe('landing page', () => {
     expect(toggle).toHaveAttribute('aria-expanded', 'false')
     await userEvent.click(toggle)
     expect(screen.getByRole('button', { name: 'إغلاق القائمة' })).toHaveAttribute('aria-expanded', 'true')
+  })
+})
+
+describe('landing features', () => {
+  it('lists six features in their own section', async () => {
+    signOut()
+    renderAt(<AppRoutes />, '/welcome')
+
+    const section = await screen.findByRole('region', { name: 'من فكرة المنشور لحد تقرير آخر الأسبوع' })
+    expect(within(section).getAllByRole('article')).toHaveLength(6)
+    expect(screen.getAllByRole('link', { name: 'المميزات' })[0]).toHaveAttribute('href', '#features')
   })
 })
