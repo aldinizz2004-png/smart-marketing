@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router'
 import { cn } from '@/lib/cn'
 import { ApiStatus } from './api-status'
+import { BusinessSwitcher } from '@/features/workspace/business-switcher'
 import { Brand } from './brand'
 import { navItems } from './nav-items'
 
@@ -10,7 +11,10 @@ export function Sidebar() {
   return (
     <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-e border-line bg-surface p-5 md:flex">
       <Brand />
-      <nav aria-label={t('nav.main')} className="mt-8 flex flex-1 flex-col gap-1">
+      <div className="mt-6">
+        <BusinessSwitcher />
+      </div>
+      <nav aria-label={t('nav.main')} className="mt-6 flex flex-1 flex-col gap-1">
         {navItems.map(({ to, labelKey, icon: Icon }) => (
           <NavLink
             key={to}

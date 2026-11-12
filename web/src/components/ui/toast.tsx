@@ -17,7 +17,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     (toast: Omit<Toast, 'id'>) => {
       const id = nextId.current++
       setToasts((all) => [...all.slice(-2), { ...toast, id }])
-      window.setTimeout(() => dismiss(id), toast.tone === 'error' ? 7000 : 4000)
+      window.setTimeout(() => dismiss(id), toast.tone === 'error' ? 7000 : 3000)
     },
     [dismiss],
   )

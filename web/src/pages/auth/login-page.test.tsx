@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it } from 'vitest'
 import { AppRoutes } from '@/app/routes'
 import { sessionStore } from '@/auth/session'
+import { workspaceRoutes } from '@/test/fixtures'
 import { fakeApi, renderAt, signOut } from '@/test/render'
 
 const authResponse = {
@@ -28,7 +29,7 @@ describe('login page', () => {
     signOut()
     const { calls } = fakeApi([
       { method: 'POST', path: '/api/auth/login', body: authResponse },
-      { path: '/health' },
+      ...workspaceRoutes(),
     ])
     renderAt(<AppRoutes />, '/login')
 

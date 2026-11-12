@@ -34,22 +34,37 @@ export function signOut() {
   sessionStore.set({ status: 'anonymous' })
 }
 
-type Route = { method?: string; path: string | RegExp; status?: number; body?: unknown; headers?: Record<string, string> }
+type Call = { method: string; url: string; body: unknown; headers: Headers }
+type Route = {
+  method?: string
+  path: string | RegExp
+  status?: number
+  body?: unknown | ((call: Call) => unknown)
+  headers?: Record<string, string>
+}
 
 // A fake API: every fetch is matched against the routes; unmatched calls fail the test loudly.
 export function fakeApi(routes: Route[]) {
-  const calls: { method: string; url: string; body: unknown; headers: Headers }[] = []
+  const calls: Call[] = []
   const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const request = input instanceof Request ? input : new Request(String(input), init)
     const url = new URL(request.url)
     const text = await request.clone().text()
-    calls.push({ method: request.method, url: url.pathname + url.search, body: text ? JSON.parse(text) : null, headers: request.headers })
+    let body: unknown
+    try {
+      body = text ? JSON.parse(text) : null
+    } catch {
+      body = text
+    }
+    const call = { method: request.method, url: url.pathname + url.search, body, headers: request.headers }
+    calls.push(call)
     const route = routes.find(
       (r) => (r.method ?? 'GET') === request.method && (typeof r.path === 'string' ? r.path === url.pathname : r.path.test(url.pathname)),
     )
     if (!route) throw new Error(`No fake route for ${request.method} ${url.pathname}`)
     const status = route.status ?? 200
-    return new Response(status === 204 ? null : JSON.stringify(route.body ?? {}), {
+    const payload = typeof route.body === 'function' ? (route.body as (c: Call) => unknown)(call) : route.body
+    return new Response(status === 204 ? null : JSON.stringify(payload ?? {}), {
       status,
       headers: { 'Content-Type': 'application/json', ...route.headers },
     })
