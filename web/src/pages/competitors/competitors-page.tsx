@@ -222,11 +222,11 @@ export function CompetitorsPage() {
                       <span className="ms-auto text-xs text-muted">{t('competitors.confidence', { value: formatPercent(insight.confidence, i18n.language, 0) })}</span>
                     )}
                   </div>
-                  <p className="font-semibold [overflow-wrap:anywhere]">{insight.summary}</p>
+                  <p dir="auto" className="font-semibold [overflow-wrap:anywhere]">{insight.summary}</p>
                   {insight.applyToUs && (
                     <div className="rounded-xl bg-brand-100/60 p-3 text-sm dark:bg-brand-900/40">
                       <p className="mb-0.5 font-semibold text-brand-800 dark:text-brand-200">{t('competitors.applyToUs')}</p>
-                      <p className="[overflow-wrap:anywhere]">{insight.applyToUs}</p>
+                      <p dir="auto" className="[overflow-wrap:anywhere]">{insight.applyToUs}</p>
                     </div>
                   )}
                 </Card>
