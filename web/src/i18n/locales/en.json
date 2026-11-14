@@ -13,7 +13,8 @@
     "campaigns": "Campaigns",
     "more": "More",
     "inbox": "WhatsApp",
-    "catalog": "Products & offers"
+    "catalog": "Products & offers",
+    "competitors": "Competitors"
   },
   "actions": {
     "switchLanguage": "العربية",
@@ -1000,5 +1001,71 @@
         }
       }
     }
+  },
+  "competitors": {
+    "title": "Competitors",
+    "subtitle": "Add competitor accounts or accounts you like. We follow their posts and tell you what you can learn.",
+    "newSource": "Track a new account",
+    "newSourceHint": "For now we only follow Instagram accounts.",
+    "addSource": "Add account",
+    "added": "Account added",
+    "url": "Account link",
+    "urlHint": "Paste the link to the Instagram profile.",
+    "urlInvalid": "Enter a valid link starting with https://",
+    "kind": "Account type",
+    "kinds": {
+      "Competitor": "Competitor",
+      "Professional": "Professional account",
+      "Inspiration": "Inspiration"
+    },
+    "filterKind": "Account type",
+    "displayName": "Name",
+    "notes": "Notes",
+    "notesHint": "For example: a close competitor in our neighbourhood.",
+    "empty": "No accounts tracked yet",
+    "emptyFiltered": "No accounts of this type",
+    "emptyHint": "Once you add an account and scan it, we fetch its posts and analyse them.",
+    "postsCount": "{{count}} posts",
+    "lastScan": "Last scan {{when}}",
+    "neverScanned": "Not scanned yet",
+    "viewPosts": "View posts",
+    "scan": "Scan now",
+    "scanned": "Scan done: {{added}} new and {{updated}} updated posts",
+    "pause": "Pause",
+    "resume": "Resume",
+    "paused": "Tracking paused",
+    "resumed": "Tracking resumed",
+    "deleteNamed": "Delete {{name}}",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteHint": "We stop following it and remove it from the list. If recommendations are built on it, deleting is not allowed; pause it instead.",
+    "deleted": "Account deleted",
+    "postsOf": "Posts of {{name}}",
+    "postsHint": "The latest posts we fetched from the account.",
+    "noPosts": "No posts",
+    "noPostsHint": "Press “Scan now” to fetch the account's posts.",
+    "openPost": "Open post",
+    "likes": "Likes",
+    "comments": "Comments",
+    "views": "Views",
+    "engagement": "Engagement",
+    "analyze": "Analyse competitors",
+    "analyzed": "{{count}} insights from {{posts}} posts",
+    "insightsTitle": "What we learned from competitors",
+    "insightsSubtitle": "Insights based on the posts of the tracked accounts, with a suggestion on how to apply them.",
+    "noInsights": "No insights yet",
+    "noInsightsHint": "Scan at least one account, then press “Analyse competitors”.",
+    "noInsightsReady": "Press “Analyse competitors” and we will produce the insights.",
+    "insightTypes": {
+      "PostingTime": "Posting time",
+      "Format": "Content format",
+      "Hook": "Opening hook",
+      "Hashtags": "Hashtags",
+      "Offer": "Offers",
+      "Tone": "Tone",
+      "Frequency": "Posting frequency",
+      "Engagement": "Engagement"
+    },
+    "confidence": "Confidence {{value}}",
+    "applyToUs": "How to use it"
   }
 }

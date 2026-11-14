@@ -8,6 +8,7 @@ import { CampaignDetailPage } from '@/pages/campaigns/campaign-detail-page'
 import { CampaignsPage } from '@/pages/campaigns/campaigns-page'
 import { CatalogPage } from '@/pages/catalog/catalog-page'
 import { CommentsPage } from '@/pages/comments/comments-page'
+import { CompetitorsPage } from '@/pages/competitors/competitors-page'
 import { ComingSoonPage } from '@/pages/coming-soon-page'
 import { ContentDetailPage } from '@/pages/content/content-detail-page'
 import { ContentListPage } from '@/pages/content/content-list-page'
@@ -36,6 +37,7 @@ export function AppRoutes() {
         <Route path="campaigns" element={<CampaignsPage />} />
         <Route path="campaigns/:id" element={<CampaignDetailPage />} />
         <Route path="catalog" element={<CatalogPage />} />
+        <Route path="competitors" element={<CompetitorsPage />} />
         <Route path="comments" element={<CommentsPage />} />
         <Route path="inbox" element={<InboxPage />} />
         <Route path="inbox/:id" element={<InboxPage />} />
