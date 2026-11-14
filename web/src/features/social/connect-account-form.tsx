@@ -101,14 +101,14 @@ export function ConnectAccountForm({ businessId, onConnected }: { businessId: st
         <p className="font-semibold">{t('social.manualTitle')}</p>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label={t('social.handle')} optional error={formState.errors.handle?.message}>
-            <Input dir="ltr" placeholder="@myshop" {...register('handle')} />
+            <Input dir="ltr" autoComplete="off" placeholder="@myshop" {...register('handle')} />
           </Field>
           <Field label={t('social.accountId')} hint={t('social.accountIdHint')} error={formState.errors.externalAccountId?.message}>
-            <Input dir="ltr" {...register('externalAccountId')} />
+            <Input dir="ltr" autoComplete="off" {...register('externalAccountId')} />
           </Field>
         </div>
         <Field label={t('social.accessToken')} hint={t('social.accessTokenHint')} error={formState.errors.accessToken?.message}>
-          <PasswordInput autoComplete="off" {...register('accessToken')} />
+          <PasswordInput autoComplete="new-password" {...register('accessToken')} />
         </Field>
         <Button type="submit" disabled={formState.isSubmitting}>
           {formState.isSubmitting ? <Spinner /> : <Link2 aria-hidden />}
