@@ -20,6 +20,8 @@ import { LandingPage } from '@/pages/landing/landing-page'
 import { NewBusinessPage } from '@/pages/new-business-page'
 import { NotFoundPage } from '@/pages/not-found-page'
 import { OnboardingPage } from '@/pages/onboarding/onboarding-page'
+import { ReportDetailPage } from '@/pages/reports/report-detail-page'
+import { ReportsPage } from '@/pages/reports/reports-page'
 import { AppShell } from './layout/app-shell'
 
 export function AppRoutes() {
@@ -40,6 +42,8 @@ export function AppRoutes() {
         <Route path="catalog" element={<CatalogPage />} />
         <Route path="competitors" element={<CompetitorsPage />} />
         <Route path="insights" element={<InsightsPage />} />
+        <Route path="reports" element={<ReportsPage />} />
+        <Route path="reports/:id" element={<ReportDetailPage />} />
         <Route path="comments" element={<CommentsPage />} />
         <Route path="inbox" element={<InboxPage />} />
         <Route path="inbox/:id" element={<InboxPage />} />

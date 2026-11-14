@@ -1,4 +1,4 @@
-import { Binoculars, ChartNoAxesCombined, House, Megaphone, MessageCircleHeart, MessagesSquare, Package, Settings, Sparkles, type LucideIcon } from 'lucide-react'
+import { Binoculars, ChartNoAxesCombined, FileText, House, Megaphone, MessageCircleHeart, MessagesSquare, Package, Settings, Sparkles, type LucideIcon } from 'lucide-react'
 
 export type NavItem = {
   to: string
@@ -17,5 +17,6 @@ export const navItems: NavItem[] = [
   { to: '/catalog', labelKey: 'nav.catalog', icon: Package },
   { to: '/insights', labelKey: 'nav.insights', icon: ChartNoAxesCombined },
   { to: '/competitors', labelKey: 'nav.competitors', icon: Binoculars },
+  { to: '/reports', labelKey: 'nav.reports', icon: FileText },
   { to: '/settings', labelKey: 'nav.settings', icon: Settings },
 ]
