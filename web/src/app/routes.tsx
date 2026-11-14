@@ -15,6 +15,7 @@ import { ContentListPage } from '@/pages/content/content-list-page'
 import { CreatePostPage } from '@/pages/content/create-post-page'
 import { HomePage } from '@/pages/home-page'
 import { InboxPage } from '@/pages/inbox/inbox-page'
+import { InsightsPage } from '@/pages/insights/insights-page'
 import { LandingPage } from '@/pages/landing/landing-page'
 import { NewBusinessPage } from '@/pages/new-business-page'
 import { NotFoundPage } from '@/pages/not-found-page'
@@ -38,6 +39,7 @@ export function AppRoutes() {
         <Route path="campaigns/:id" element={<CampaignDetailPage />} />
         <Route path="catalog" element={<CatalogPage />} />
         <Route path="competitors" element={<CompetitorsPage />} />
+        <Route path="insights" element={<InsightsPage />} />
         <Route path="comments" element={<CommentsPage />} />
         <Route path="inbox" element={<InboxPage />} />
         <Route path="inbox/:id" element={<InboxPage />} />
