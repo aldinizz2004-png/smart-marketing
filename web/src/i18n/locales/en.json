@@ -14,7 +14,8 @@
     "more": "More",
     "inbox": "WhatsApp",
     "catalog": "Products & offers",
-    "competitors": "Competitors"
+    "competitors": "Competitors",
+    "insights": "Performance & tips"
   },
   "actions": {
     "switchLanguage": "العربية",
@@ -1067,5 +1068,92 @@
     },
     "confidence": "Confidence {{value}}",
     "applyToUs": "How to use it"
+  },
+  "insights": {
+    "title": "Performance & recommendations",
+    "subtitle": "See what worked in your posts and what the AI advises you to do next.",
+    "tabs": {
+      "performance": "Performance",
+      "recommendations": "Recommendations",
+      "runs": "AI analyses"
+    },
+    "performance": {
+      "range": "Period",
+      "lastDays": "Last {{count}} days",
+      "empty": "No published posts in this period",
+      "emptyHint": "Once you publish posts and their numbers are collected, they show up here.",
+      "posts": "Posts",
+      "reach": "Reach",
+      "impressions": "Impressions",
+      "engagement": "Engagement rate",
+      "likes": "Likes",
+      "comments": "Comments",
+      "shares": "Shares",
+      "saves": "Saves",
+      "clicks": "Link clicks",
+      "by": {
+        "platform": "By platform",
+        "format": "By content format",
+        "hook": "By opening hook"
+      },
+      "noGroups": "No data",
+      "groupLine": "{{posts}} posts · reach {{reach}} · engagement {{rate}}",
+      "topPosts": "Top posts",
+      "noTop": "No posts to show.",
+      "topLine": "Reach {{reach}} · engagement {{rate}}",
+      "openPost": "Open post",
+      "none": "None"
+    },
+    "recommendations": {
+      "statuses": {
+        "Pending": "Waiting for you",
+        "Accepted": "Accepted",
+        "Rejected": "Rejected",
+        "Applied": "Done"
+      },
+      "actions": {
+        "NewContent": "New post",
+        "ReviseCopy": "Revise the text",
+        "ChangeFormat": "Change the format",
+        "ChangeChannel": "Change the platform",
+        "Reschedule": "Reschedule",
+        "Pause": "Pause"
+      },
+      "auto": "Applied automatically",
+      "confidence": "Confidence {{value}}",
+      "proposedAt": "Suggested time: {{when}}",
+      "evidence": "Why do we suggest it?",
+      "accept": "Accept",
+      "reject": "Reject",
+      "accepted": "Recommendation accepted",
+      "rejected": "Recommendation rejected",
+      "writePost": "Write the post",
+      "applyTitle": "Write the post from this recommendation",
+      "applyHint": "Choose the campaign the post belongs to; the AI writes it as a draft.",
+      "applyHintCampaign": "The AI will write the post as a draft inside the recommendation's campaign.",
+      "campaign": "Campaign",
+      "noCampaign": "There is no open campaign. Create one first on the Campaigns page.",
+      "apply": "Write the post",
+      "applied": "Draft created",
+      "empty": "No recommendations",
+      "emptyPending": "No recommendations waiting for you",
+      "emptyHint": "Ask for new ones from the “AI analyses” tab."
+    },
+    "runs": {
+      "newTitle": "Ask the AI what to do next",
+      "newHint": "It analyses the performance of your posts and your competitors, then suggests steps.",
+      "window": "Analysis period",
+      "windowDays": "{{count}} days",
+      "campaign": "Campaign",
+      "wholeBusiness": "The whole shop",
+      "start": "Start the analysis",
+      "started": "{{count}} recommendations ready",
+      "empty": "No analyses yet",
+      "emptyHint": "Press “Start the analysis” and we will produce recommendations.",
+      "period": "{{from}} to {{to}}",
+      "completedAt": "Completed {{when}}",
+      "notCompleted": "Not completed yet",
+      "count": "{{count}} recommendations"
+    }
   }
 }
