@@ -35,6 +35,23 @@ The public landing page lives at `/welcome` and is built from the same component
 
 To see it while signed in, open http://localhost:5173/welcome directly.
 
+## Pages
+
+| Route | What it does |
+| --- | --- |
+| `/welcome` | Public landing page |
+| `/login`, `/register`, `/onboarding` | Sign in, create an account, then plan, shop, brand and accounts |
+| `/` | Home: counts, upcoming posts and the latest report |
+| `/content`, `/campaigns` | Write, review and schedule posts; campaigns with AI plans |
+| `/inbox`, `/comments` | WhatsApp conversations and comments with suggested replies |
+| `/catalog` | Products, offers and the media library |
+| `/competitors` | Tracked accounts, scans and the insights drawn from them |
+| `/insights` | Performance numbers, AI recommendations and strategy runs |
+| `/reports` | Owner reports, their email version, and sending them |
+| `/settings` | Shop details and brand, social accounts, automation policy, team, subscription and AI usage |
+
+What each role can do follows the API policies (`src/auth/roles.ts`): viewers read, editors write, reviewers approve, admins manage the shop and team, and only the owner changes the subscription.
+
 ## Scripts
 
 | Script | What it does |
