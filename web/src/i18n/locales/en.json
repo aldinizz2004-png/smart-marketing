@@ -1214,5 +1214,126 @@
     "approvedNotScheduled": "Approved posts not scheduled",
     "scheduledNext7Days": "Posts scheduled for next week",
     "offersEnding": "Offers ending soon"
+  },
+  "settings": {
+    "tabs": {
+      "business": "Shop & brand",
+      "accounts": "Accounts",
+      "automation": "Automation",
+      "team": "Team",
+      "plan": "Subscription"
+    },
+    "business": {
+      "title": "Shop details",
+      "adminOnly": "Only an admin or the owner can edit the shop details."
+    },
+    "brand": {
+      "title": "Brand",
+      "subtitle": "The dialect and tone the AI writes your posts in."
+    },
+    "terms": {
+      "title": "Preferred and prohibited words",
+      "subtitle": "Words the AI always uses, and words it never writes.",
+      "none": "No words added yet.",
+      "added": "Word added",
+      "add": "Add word",
+      "term": "Word or phrase",
+      "rule": "Rule",
+      "note": "Note",
+      "rules": {
+        "Preferred": "Preferred",
+        "Prohibited": "Prohibited"
+      },
+      "deleteNamed": "Delete the word {{term}}"
+    },
+    "accounts": {
+      "title": "Social accounts",
+      "subtitle": "The accounts your shop publishes to.",
+      "adminOnly": "Only an admin or the owner can connect or disconnect accounts.",
+      "add": "Connect an account",
+      "disconnected": "Account disconnected",
+      "disconnectTitle": "Disconnect {{name}}?",
+      "disconnectHint": "No new posts will go to it. You can connect it again at any time."
+    },
+    "automation": {
+      "title": "Automation policy",
+      "subtitle": "The limits of what the AI can do on its own.",
+      "adminOnly": "Only an admin or the owner can edit the policy.",
+      "enabled": "Turn automation on",
+      "enabledHint": "Lets the system apply recommendations within the limits below.",
+      "separateReviewer": "Reviewer different from the writer",
+      "separateReviewerHint": "The same person cannot write a post and approve it.",
+      "autoReply": "Automatic replies to messages",
+      "autoReplyHint": "The AI answers customer messages inside the 24-hour window.",
+      "maxPosts": "Most posts per day",
+      "maxPostsHint": "Your plan allows {{count}} per day.",
+      "overPlan": "Your plan allows at most {{count}} posts per day.",
+      "maxDiscount": "Highest discount (%)",
+      "windowStart": "Publishing window starts",
+      "windowEnd": "Publishing window ends",
+      "budget": "Monthly ad budget",
+      "budgetCurrency": "Budget currency",
+      "platforms": "Allowed platforms",
+      "platformsHint": "If you choose none, publishing is allowed on every connected platform.",
+      "autoApply": "Recommendations applied automatically",
+      "autoApplyHint": "The types the system applies without waiting for your decision."
+    },
+    "team": {
+      "title": "Team",
+      "subtitle": "Who can sign in and work on the account.",
+      "adminOnly": "Only an admin or the owner can manage the team.",
+      "add": "Add a member",
+      "addHint": "They need an account with the same email.",
+      "added": "Member added",
+      "email": "Email",
+      "role": "Role",
+      "roleHint": "An editor writes, a reviewer approves, a viewer can only read.",
+      "roleOf": "Role of {{name}}",
+      "roleChanged": "Role changed",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "deactivated": "Member deactivated",
+      "activated": "Member activated",
+      "you": "you",
+      "joined": "Joined {{date}}"
+    },
+    "plan": {
+      "title": "Subscription",
+      "accountTitle": "Account",
+      "accountHint": "The account name appears in the menu and in messages.",
+      "ownerOnly": "Only the owner can change the name or the subscription.",
+      "accountName": "Account name",
+      "cancel": "Cancel subscription",
+      "cancelTitle": "Cancel the subscription?",
+      "cancelHint": "The subscription stops and you lose access to the other features. Be sure before you continue.",
+      "canceled": "Subscription canceled",
+      "none": "There is no active subscription.",
+      "history": "Previous subscriptions"
+    },
+    "usage": {
+      "title": "AI usage",
+      "subtitle": "How often the system used AI and what it cost.",
+      "period": "Period",
+      "lastDays": "Last {{count}} days",
+      "total": "Operations",
+      "succeeded": "Succeeded",
+      "failed": "Failed",
+      "cost": "Cost",
+      "count": "{{count}} times",
+      "events": {
+        "CopyGeneration": "Writing copy",
+        "ImageGeneration": "Image generation",
+        "VideoGeneration": "Video generation",
+        "Publish": "Publishing",
+        "CompetitorScan": "Competitor scans",
+        "StrategyGeneration": "Plans and strategy",
+        "CommentAnalysis": "Comment analysis",
+        "OwnerReport": "Reports",
+        "CompetitorAnalysis": "Competitor analysis",
+        "CustomerReply": "Customer replies",
+        "WhatsAppMessage": "WhatsApp messages",
+        "ImageDescription": "Image descriptions"
+      }
+    }
   }
 }

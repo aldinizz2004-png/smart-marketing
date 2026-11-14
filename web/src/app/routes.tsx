@@ -1,5 +1,4 @@
-import { Settings } from 'lucide-react'
-import { Route, Routes } from 'react-router'
+﻿import { Route, Routes } from 'react-router'
 import { PublicOnly, RequireAuth } from '@/auth/guards'
 import { RequireWorkspace } from '@/features/workspace/require-workspace'
 import { LoginPage } from '@/pages/auth/login-page'
@@ -9,7 +8,6 @@ import { CampaignsPage } from '@/pages/campaigns/campaigns-page'
 import { CatalogPage } from '@/pages/catalog/catalog-page'
 import { CommentsPage } from '@/pages/comments/comments-page'
 import { CompetitorsPage } from '@/pages/competitors/competitors-page'
-import { ComingSoonPage } from '@/pages/coming-soon-page'
 import { ContentDetailPage } from '@/pages/content/content-detail-page'
 import { ContentListPage } from '@/pages/content/content-list-page'
 import { CreatePostPage } from '@/pages/content/create-post-page'
@@ -22,6 +20,7 @@ import { NotFoundPage } from '@/pages/not-found-page'
 import { OnboardingPage } from '@/pages/onboarding/onboarding-page'
 import { ReportDetailPage } from '@/pages/reports/report-detail-page'
 import { ReportsPage } from '@/pages/reports/reports-page'
+import { SettingsPage } from '@/pages/settings/settings-page'
 import { AppShell } from './layout/app-shell'
 
 export function AppRoutes() {
@@ -47,7 +46,7 @@ export function AppRoutes() {
         <Route path="comments" element={<CommentsPage />} />
         <Route path="inbox" element={<InboxPage />} />
         <Route path="inbox/:id" element={<InboxPage />} />
-        <Route path="settings/*" element={<ComingSoonPage page="settings" icon={Settings} />} />
+        <Route path="settings" element={<SettingsPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
     </Routes>
