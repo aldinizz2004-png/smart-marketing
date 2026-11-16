@@ -2,6 +2,7 @@ import { Plus } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, useNavigate, useSearchParams } from 'react-router'
+import { ApiError } from '@/api/errors'
 import { can } from '@/auth/roles'
 import { useSession } from '@/auth/use-session'
 import { PageHeader } from '@/components/page-header'
@@ -118,6 +119,8 @@ export function CreatePostPage() {
             onSubmit={async (firstRevision) => {
               if (!chosenCampaign) {
                 setMissing(true)
+                toast.error(new ApiError(400, { detail: t('content.create.needCampaign') }))
+                setNewCampaign(true)
                 return
               }
               try {
